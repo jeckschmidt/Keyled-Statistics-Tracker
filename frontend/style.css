@@ -1,0 +1,25 @@
+.center {
+    margin: auto;
+    padding: 10px
+}
+
+.header {
+    background-color: bisque;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0,1);
+    max-width: 100%;
+    text-align: center;
+    font-size: 30px;
+    color: rgb(0, 4, 4);
+}
+
+
+th, td {
+    border:1px solid black;
+    text-align: center;
+}
+
+table {
+    width: 70%
+}
