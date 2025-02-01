@@ -30,7 +30,8 @@ async function start(app, port) {
 
 app.use('/home', homeRoute)
 app.use('/database', databaseRoute)
-app.use(express.static(homeDir + '/frontend'));
+app.use(express.static(homeDir + '/frontend'))
+app.use(express.static(homeDir + '/public'))
 
 app.use(helmet())
 

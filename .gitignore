@@ -1,3 +1,6 @@
 /.env
 /node_modules
 /endpointTesting.py
+/testing.py
+/public/flashes.csv
+/user_autostart.sh
