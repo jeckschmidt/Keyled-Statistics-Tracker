@@ -10,6 +10,6 @@ CREATE TABLE target_information (
     program_version VARCHAR (50),
     target_RTC VARCHAR (50),
     flash_date VARCHAR (50),
-    realtime_RTC_difference VARCHAR (50),
+    rtc_drift VARCHAR (50),
     PRIMARY KEY (id)
 );
