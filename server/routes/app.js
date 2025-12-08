@@ -28,7 +28,6 @@ router.get('/', async (req,res,next) => {
     var results
     try {
         [results] = await pool.query(query)
-        console.log("[DATABASE] Results found")
     } catch (err) {
         console.log(`[DATABASE] Query failed: ${err}`)
     }
