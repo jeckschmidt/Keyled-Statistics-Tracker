@@ -2,7 +2,6 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import path from 'path'
 import { createDatabase } from '../database.js'
-import { create } from 'domain'
 
 const router = express.Router()
 
@@ -36,6 +35,15 @@ router.get('/', async (req,res,next) => {
     
     const columnsTemp = results.length > 0 ? Object.keys(results[0]) : []
     var rows = results.length > 0 ?results.map(row => Object.values(row)) : []
+    for (let i=0; i< rows.length;i++) {
+
+        if (rows[i][2] == 1) {
+            rows[i][2] = 'pass'
+        }
+        if (rows[i][2] == 0) {
+            rows[i][2] = 'fail'
+        }
+    }
     
     const columns = columnsTemp.map(processList)
     
@@ -53,5 +61,6 @@ router.get('/', async (req,res,next) => {
     })
 
 })
+
 
 export default router

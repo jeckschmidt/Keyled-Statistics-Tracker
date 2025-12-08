@@ -10,12 +10,9 @@
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <div class="header fullWidth">
+        <div class="header">
             <h1> Keyled Statistics Tracker </h1>
         </div>
-
-        <br>
-        <br>
 
         <!--
         <table class="center">
@@ -55,9 +52,21 @@
                             <tbody>
                                 <% rows.forEach((row) => { %>
                                     <tr>
-                                        <% row.forEach((data) => { %>
-                                            <td> <%= data %> </td>
-                                        <% }) %>
+                                    <% row.forEach((data, colIndex) => { %>
+
+                                        <% if (colIndex === 2) { %>
+                                        <!-- 3rd column only: wrap number in span -->
+                                        <td>
+                                            <span class="<%= data == 'pass' ? 'num-green' : (data == 'fail' ? 'num-red' : '') %>">
+                                            <%= data %>
+                                            </span>
+                                        </td>
+
+                                        <% } else { %>
+                                        <td><%= data %></td>
+                                        <% } %>
+
+                                    <% }) %>
                                     </tr>
                                 <% }) %>
                             </tbody>
@@ -74,5 +83,7 @@
                 <button class="button"> Download as CSV</button>
             </a>
          </div> 
+
+         <script src="/socket.io/socket.io.js"></script>
     </body>
 </html>
