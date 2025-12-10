@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Keyled Statistics Tracker</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/public/frontend/style.css">
+    </head>
+    <body>
+        <div class="header">
+            <h1> Keyled Statistics Tracker </h1>
+        </div>
+
+        
+        <!-- <table class="center">
+            <thead>
+            <tr>
+                <% columns.forEach((coulmn) => { %>
+                    <th> <%= coulmn %> </th>
+                <% }) %>
+            </tr>
+            </thead>
+
+            <tbody>
+                <% rows.forEach((row) => { %>
+                    <tr>
+                        <% row.forEach((data) => { %>
+                            <td> <%= data %> </td>
+                        <% }) %>
+                    </tr>
+                <% }) %>
+            </tbody>
+       
+          </table> -->
+       
+
+        <div class="limiter center">
+            <div class="container-table100">
+                <div class="wrap-table100">
+                    <div class="table100">
+                        <table>
+                            
+                            <thead id="table_head">
+                               <!-- <tr class="table100-head">
+                                    <% columns.forEach((column) => { %>
+                                        <th class="table100-head"> <%= column %> </th>
+                                    <% }) %>
+                                </tr> -->
+                            </thead>
+                            <tbody id="table_body">
+                                <!-- <% rows.forEach((row) => { %>
+                                    <tr>
+                                    <% row.forEach((data, colIndex) => { %>
+
+                                        <% if (colIndex === 4) { %>
+                                        <td>
+                                            <span class="<%= data == 'pass' ? 'num-green' : (data == 'fail' ? 'num-red' : '') %>">
+                                            <%= data %>
+                                            </span>
+                                        </td>
+
+                                        <% } else { %>
+                                        <td><%= data %></td>
+                                        <% } %>
+
+                                    <% }) %>
+                                    </tr>
+                                <% }) %> -->
+                            </tbody> 
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+          <div class="center">
+            <a href="../flashes.csv" download="keyled_flashes.csv">
+                <button class="button"> Download as CSV</button>
+            </a>
+         </div> 
+
+         <script src="/socket.io/socket.io.js"></script>
+         <script src="/public/frontend/homePage.js"></script>
+         
+    </body>
+</html>

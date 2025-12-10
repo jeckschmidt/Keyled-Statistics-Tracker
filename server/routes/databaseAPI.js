@@ -20,11 +20,6 @@ router.post('/insert/target', async (req,res,next)=> {
     res.sendStatus(200)
 })
 
-router.get('/get-table', async (req, res, next) => {
-
-})
-
-
 
 router.get('/get-entry-count', async (req, res, next) => {
 
