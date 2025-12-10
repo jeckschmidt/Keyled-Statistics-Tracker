@@ -9,22 +9,23 @@ function capitalize(string) {
     return `${String(string).charAt(0).toUpperCase()}${String(string).slice(1)}`
 }
 
-// Hard coded for max two words
 function processList(string) {
-    var [word1, word2] = String(string).split("_")
-    if (word2 !== undefined) {
-        return `${capitalize(word1)} ${capitalize(word2)}`
+    var words = String(string).split("_")
+    words = words.map(function(word) {
+        return capitalize(word)
+    })
+    if (String(string) == "flash_provision") {
+        return words.join("/")
     }
-    else {
-        return  capitalize(word1)
-    }
+    return words.join(" ")
 }
 
 const homeDir = path.resolve();
 router.get('/', async (req,res,next) => {
 
     const pool = await createDatabase()
-    const query = 'SELECT * FROM target_information'
+    const query = `SELECT id, serial_number, reader_number, hostname, flash_status, bytes_written, program_version, flash_date, flash_provision
+        FROM target_information;`
     var results
     try {
         [results] = await pool.query(query)
@@ -34,14 +35,12 @@ router.get('/', async (req,res,next) => {
     
     const columnsTemp = results.length > 0 ? Object.keys(results[0]) : []
     var rows = results.length > 0 ?results.map(row => Object.values(row)) : []
-    for (let i=0; i< rows.length;i++) {
 
-        if (rows[i][2] == 1) {
-            rows[i][2] = 'pass'
-        }
-        if (rows[i][2] == 0) {
-            rows[i][2] = 'fail'
-        }
+    const statusMap = {1: 'pass', 0: 'fail'}
+    const statusIndex = 4
+
+    for (const row of rows) {
+        row[statusIndex] = statusMap[row[statusIndex]] ?? row[statusIndex];
     }
     
     const columns = columnsTemp.map(processList)

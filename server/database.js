@@ -12,7 +12,8 @@ export async function createDatabase() {
         user: app.user,
         password: app.password,
         database: app.database,
-        connectionLimit: 10
+        connectionLimit: 10,
+        typeCast: false
     }).promise()
 
     return pool
@@ -23,7 +24,9 @@ export async function insertIntoTarget(values) {
     const pool = await createDatabase()
 
     const table = process.env.MYSQL_TABLE
-    const query = `INSERT INTO ${table} (serial_number, flash_status, bytes_written, program_version, target_RTC, flash_date, RTC_drift) VALUES (?, ?, ?, ?, ?, ?, ?)`
+    const query = `INSERT INTO ${table}
+                   (serial_number, flash_status, bytes_written, program_version, target_RTC, flash_date, RTC_drift, flash_provision, hostname, reader_number)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     
     var result
 
