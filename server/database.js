@@ -6,22 +6,23 @@ import {parse} from 'json2csv'
 import path from 'path'
 import { getIo } from './websocket.js'
 
-var pool
-export async function createDatabase() {
-    pool = mysql.createPool({
-        host: app.host,
-        user: app.user,
-        password: app.password,
-        database: app.database,
-        connectionLimit: 10,
-    }).promise()
-
+let pool
+export async function getDatabasePool() {
+    if (!pool) {
+        pool = mysql.createPool({
+            host: app.host,
+            user: app.user,
+            password: app.password,
+            database: app.database,
+            connectionLimit: 10,
+        }).promise()
+    }
     return pool
 }
 
 
 export async function insertIntoTarget(values) {
-    const pool = await createDatabase()
+    const pool = await getDatabasePool()
 
     const table = process.env.MYSQL_TABLE
     const query = `INSERT INTO ${table}
@@ -45,17 +46,11 @@ export async function insertIntoTarget(values) {
         console.log(err)
     }
 
-    pool.end((err) => {
-        if (err) {
-            console.error("[DATABASE] Database pool couldn't be closed")
-        }
-    })
-
    return result
 }
 
 export async function tableToCSV() {
-    const pool = await createDatabase()
+    const pool = await getDatabasePool()
 
     const query = "SELECT * FROM target_information"
     const rows = (await pool.query(query))[0]
@@ -65,16 +60,11 @@ export async function tableToCSV() {
     const homeDir = path.resolve();
     fs.writeFileSync(homeDir + '/public/flashes.csv', csvData)
 
-    pool.end((err) => {
-        if (err) {
-            console.error("[DATABASE] Database pool couldn't be closed")
-        }
-    })
 }
 
 
 export async function tableToJSON() {
-    const pool = await createDatabase()
+    const pool = await getDatabasePool()
     const query = `SELECT id, serial_number, reader_number, hostname, flash_status, bytes_written, program_version, flash_date, flash_provision
         FROM target_information;`
     var results
@@ -94,12 +84,6 @@ export async function tableToJSON() {
         row[statusIndex] = statusMap[row[statusIndex]] ?? row[statusIndex];
     }
     const columns = columnsTemp.map(processList)
-
-    pool.end((err) => {
-        if (err) {
-            console.error("[DATABASE] Database pool couldn't be closed")
-        }
-    })
 
     return {rows: rows, columns: columns}
 
