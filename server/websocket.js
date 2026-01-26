@@ -1,21 +1,23 @@
 import { Server } from 'socket.io';
 import { tableToJSON } from './database.js';
 
-var io
+let io
 
 export function startWebSocketServer(server) {
     io = new Server(server);
 
     io.on('connection', async (socket) => {
-        console.log('Client connected:', socket.id);
-
         // Send JSON on connect
-        var table = await tableToJSON()
-        socket.emit('init', table)
+        try {
+            var table = await tableToJSON()
+            socket.emit('init', {success: true, table: table})
+        } catch (err) {
+            socket.emit('init', {success: false})
+            console.error("[Socket.io] Couldn't send table to client: ", err)
+        }
 
 
         socket.on('disconnect', () => {
-            console.log('Client disconnected:', socket.id);
         });
     });
 }

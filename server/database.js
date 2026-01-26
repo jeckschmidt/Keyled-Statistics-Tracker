@@ -1,5 +1,4 @@
 import mysql from 'mysql2'
-import dotenv from 'dotenv/config'
 import { app } from '../config.js'
 import fs from 'fs'
 import {parse} from 'json2csv'
@@ -23,55 +22,53 @@ export async function getDatabasePool() {
 
 export async function insertIntoTarget(values) {
     const pool = await getDatabasePool()
-
-    const table = process.env.MYSQL_TABLE
+    const table = app.table
     const query = `INSERT INTO ${table}
                    (serial_number, flash_status, bytes_written, program_version, target_RTC, flash_date, RTC_drift, flash_provision, hostname, reader_number)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    
-    var result
-
     try {
-        result = await pool.query(query, values)
-        console.log('[DATABASE] Successfully updated database')
-
-        var {rows, columns} = await tableToJSON()
-        var newRow = rows[rows.length - 1]
-
-        var io = getIo()
-        io.emit('newRow', {newRow: newRow})
-
+        let result = await pool.query(query, values)
     } catch (err) {
-        console.log('[DATABASE] Error')
-        console.log(err)
+        throw err
     }
 
-   return result
+    let {rows, columns} = await tableToJSON()
+    let newRow = rows[rows.length - 1]
+
+    let io = getIo()
+    io.emit('newRow', {newRow: newRow})
+    return result
 }
 
 export async function tableToCSV() {
     const pool = await getDatabasePool()
-
     const query = "SELECT * FROM target_information"
-    const rows = (await pool.query(query))[0]
-
-    const csvData = parse(rows)
     
-    const homeDir = path.resolve();
-    fs.writeFileSync(homeDir + '/public/flashes.csv', csvData)
-
+    try {
+        const rows = (await pool.query(query))[0]
+    } catch (err) {
+        throw err
+    }
+    
+    const csvData = parse(rows)
+    try {
+        fs.writeFileSync(app.csvLocation, csvData)
+    } catch (err) {
+        throw err
+    }
 }
 
 
 export async function tableToJSON() {
     const pool = await getDatabasePool()
+    const table = app.table
     const query = `SELECT id, serial_number, reader_number, hostname, flash_status, bytes_written, program_version, flash_date, flash_provision
-        FROM target_information;`
+        FROM ${table};`
     var results
     try {
         [results] = await pool.query(query)
     } catch (err) {
-        console.log(`[DATABASE] Query failed: ${err}`)
+        throw err
     }
     
     const columnsTemp = results.length > 0 ? Object.keys(results[0]) : []

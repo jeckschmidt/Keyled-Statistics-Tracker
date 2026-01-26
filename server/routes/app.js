@@ -1,21 +1,21 @@
 import express from 'express'
-import bodyParser from 'body-parser'
 import path from 'path'
-import { createDatabase } from '../database.js'
+import { CustomError } from '../types/customError.js';
 
 const router = express.Router()
 
 const homeDir = path.resolve();
-router.get('/', async (req,res,next) => {
+router.get('/', (req,res,next) => {
     
     var filePath = `${homeDir}/public/frontend/homePage.html`
-    try {
-        res.sendFile(filePath)
-    } catch (err) {
-        res.status(500).send(err)
-    }
-
+    res.status(200).sendFile(filePath, (err) => {
+        if (err) {
+            if (err.code === "ENOENT") {
+                return next(new CustomError({status:404, source:"App", message: "No resource found", details:err}))
+            }
+            return next(err)
+        }
+    })
 })
-
 
 export default router

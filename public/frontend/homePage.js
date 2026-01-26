@@ -4,17 +4,16 @@ const socket = io();
 var isRendered
 
 socket.on('init', (data) => {
-    console.log('Connected:', data);
-    const {columns, rows} = data
+    if (data.success == false) {
+        console.error("Could not reach the server")
+        return
+    }
+    const {columns, rows} = data.table
     renderTable(columns, rows)
 });
 
 socket.on('newRow', (data) => {
-    console.log('Received new row: ', data);
-    var row = data.newRow
-
-    console.log(row)
-    
+    var row = data.newRow 
     appendRow(row)
 });
 

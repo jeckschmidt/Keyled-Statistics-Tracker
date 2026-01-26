@@ -3,16 +3,17 @@ import http from 'http'
 import dotenv from 'dotenv/config'
 import path from 'path'
 import helmet from 'helmet'
-import { createDatabase } from './database.js'
 import { sleep } from './helpers.js'
 import  { startWebSocketServer } from "./websocket.js"
+import { app as appConfig } from '../config.js'
+import { CustomError } from './types/customError.js'
 
 import homeRoute from './routes/app.js'
 import databaseRoute from './routes/databaseAPI.js'
 
 var app = express()
 
-const port = process.env.PORT
+const port = appConfig.port
 const homeDir = path.resolve();
 
 var server
@@ -34,16 +35,29 @@ async function start(app, port) {
     return server.listen(port)
 }
 
-app.use('/home', homeRoute)
-app.use('/database', databaseRoute)
-app.use(express.static(homeDir + '/frontend'))
-app.use(express.static(homeDir + '/public'))
-
 app.use(helmet())
 
+app.use('/home', homeRoute)
+app.use('/database', databaseRoute)
 app.use('/public', express.static('public'))
 
-// app.set('view engine', 'ejs')
+// global error handling middlware
+app.use((err, req, res, next) => {
+    if (err instanceof CustomError) {
+        console.error( `[${err.source}] ${err.message}: ${err.details}`)
+
+        return res.status(err.status).json({
+            message: err.message,
+            // details: err.details
+        })
+    }
+
+    console.err("[Error Handler] Unexpected error:", err)
+    return res.status(500).json({
+        message: "Internal Server Error"
+    })
+})
+
 
 // start https server
 start(app, port).catch(async (err)=> {
