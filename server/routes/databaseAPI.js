@@ -7,7 +7,7 @@ import { CustomError } from '../types/customError.js'
 const router = express.Router()
 router.use(bodyParser.json())
 
-
+let origin = "Database API"
 router.post('/insert/target', async (req,res,next)=> {
     console.log("[Database API] New entry requested to be entered....")
     var body = req.body
@@ -21,7 +21,7 @@ router.post('/insert/target', async (req,res,next)=> {
         console.log("[Database API] Entry entered successfully")
         res.status(200).json({message: "Success"})
     } catch (err) {
-        next(new CustomError({message:"Error with database transaction", details:err, source:"Database API"}))
+        next(new CustomError({origin: origin, details: "DB Transaction failure", error: err, cause: err}))
     }
 })
 
@@ -41,7 +41,7 @@ router.get('/get-entry-count', async (req, res, next) => {
             res.status(200).json({count: 0})
         }
     } catch (err) {
-        next(new CustomError({message:"Error retrieving entry count", details:err, source:"Database API"}))
+        next(new CustomError({origin: origin, details: "Failed to get DB entry count", cause: err}))
     }
 })
 

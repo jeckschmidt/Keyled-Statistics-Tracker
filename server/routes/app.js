@@ -4,14 +4,15 @@ import { CustomError } from '../types/customError.js';
 
 const router = express.Router()
 
+let origin="App"
 const homeDir = path.resolve();
 router.get('/', (req,res,next) => {
     
-    var filePath = `${homeDir}/public/frontend/homePage.html`
+    var filePath = `${homeDir}/public/frontend/homePage.htm`
     res.status(200).sendFile(filePath, (err) => {
         if (err) {
             if (err.code === "ENOENT") {
-                return next(new CustomError({status:404, source:"App", message: "No resource found", details:err}))
+                next(new CustomError({origin: origin, details: "Resource not found", error: err, cause: err, status: 404}))
             }
             return next(err)
         }

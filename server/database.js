@@ -26,8 +26,9 @@ export async function insertIntoTarget(values) {
     const query = `INSERT INTO ${table}
                    (serial_number, flash_status, bytes_written, program_version, target_RTC, flash_date, RTC_drift, flash_provision, hostname, reader_number)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    let result
     try {
-        let result = await pool.query(query, values)
+        result = await pool.query(query, values)
     } catch (err) {
         throw err
     }
@@ -44,15 +45,16 @@ export async function tableToCSV() {
     const pool = await getDatabasePool()
     const query = "SELECT * FROM target_information"
     
+    let rows
     try {
-        const rows = (await pool.query(query))[0]
+        rows = (await pool.query(query))[0]
     } catch (err) {
         throw err
     }
     
     const csvData = parse(rows)
     try {
-        fs.writeFileSync(app.csvLocation, csvData)
+        fs.writeFileSync(`${app.csvLocation}/flashes.csv`, csvData)
     } catch (err) {
         throw err
     }
@@ -63,7 +65,7 @@ export async function tableToJSON() {
     const pool = await getDatabasePool()
     const table = app.table
     const query = `SELECT id, serial_number, reader_number, hostname, flash_status, bytes_written, program_version, flash_date, flash_provision
-        FROM ${table} ORDER BY id DESC;`
+        FROM ${table};`
     var results
     try {
         [results] = await pool.query(query)

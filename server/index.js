@@ -44,11 +44,10 @@ app.use('/public', express.static('public'))
 // global error handling middlware
 app.use((err, req, res, next) => {
     if (err instanceof CustomError) {
-        console.error( `[${err.source}] ${err.message}: ${err.details}`)
+        console.error(`[${err.origin}] ${err.details} --${err.message} ${err.error}: ${err.stack}`)
 
         return res.status(err.status).json({
-            message: err.message,
-            // details: err.details
+            details: err.details
         })
     }
 
