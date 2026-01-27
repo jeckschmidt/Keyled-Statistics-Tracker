@@ -63,7 +63,7 @@ export async function tableToJSON() {
     const pool = await getDatabasePool()
     const table = app.table
     const query = `SELECT id, serial_number, reader_number, hostname, flash_status, bytes_written, program_version, flash_date, flash_provision
-        FROM ${table};`
+        FROM ${table} ORDER BY id DESC;`
     var results
     try {
         [results] = await pool.query(query)
