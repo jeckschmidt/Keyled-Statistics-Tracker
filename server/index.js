@@ -7,6 +7,7 @@ import { sleep } from './helpers.js'
 import  { startWebSocketServer } from "./websocket.js"
 import { app as appConfig } from '../config.js'
 import { CustomError } from './types/customError.js'
+import { globalErrorHandler } from './middleware.js'
 
 import homeRoute from './routes/app.js'
 import databaseRoute from './routes/databaseAPI.js'
@@ -42,20 +43,7 @@ app.use('/database', databaseRoute)
 app.use('/public', express.static('public'))
 
 // global error handling middlware
-app.use((err, req, res, next) => {
-    if (err instanceof CustomError) {
-        console.error(`[${err.origin}] ${err.details} --${err.message} ${err.error}: ${err.stack}`)
-
-        return res.status(err.status).json({
-            details: err.details
-        })
-    }
-
-    console.err("[Error Handler] Unexpected error:", err)
-    return res.status(500).json({
-        message: "Internal Server Error"
-    })
-})
+app.use(globalErrorHandler)
 
 
 // start https server
