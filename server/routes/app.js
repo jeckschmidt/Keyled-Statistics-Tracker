@@ -8,7 +8,7 @@ let origin="App"
 const homeDir = path.resolve();
 router.get('/', (req,res,next) => {
     
-    var filePath = `${homeDir}/public/frontend/homePage.htm`
+    var filePath = `${homeDir}/public/frontend/homePage.html`
     res.status(200).sendFile(filePath, (err) => {
         if (err) {
             if (err.code === "ENOENT") {
