@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client'
 
 const socket = io();
-var isRendered
+let isRendered
 
 socket.on('init', (data) => {
     if (data.success == false) {
@@ -13,7 +13,7 @@ socket.on('init', (data) => {
 });
 
 socket.on('newRow', (data) => {
-    var row = data.newRow 
+    var row = data.newRow
     appendRow(row)
 });
 
@@ -23,6 +23,8 @@ function renderTable(columns, rows) {
     if (isRendered) {
         return
     }
+
+    rows.reverse()
 
     // HEADERS
     const thead = document.getElementById('table_head')
@@ -71,11 +73,18 @@ function renderTable(columns, rows) {
 
 function appendRow(row) {
 
+    console.log("append row function")
+
     const tbody = document.getElementById('table_body')
     const tr = document.createElement('tr');
 
+    // console.log(typeof(row))
+    // row = Object.values(row)
+    // console.log(Array.isArray(row))
+
     row.forEach((data, colIndex) => {
         const td = document.createElement('td');
+        console.log(data)
 
         if (colIndex === 4) {
             // Create a <span> with conditional class
@@ -91,5 +100,7 @@ function appendRow(row) {
 
         tr.appendChild(td);
     });
-    tbody.appendChild(tr);
+    tbody.prepend(tr);
+
+    console.log("function end")
 }
