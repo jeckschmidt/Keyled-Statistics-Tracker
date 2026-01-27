@@ -8,5 +8,5 @@ export const app = {
     password: process.env.MYSQL_PASSWORD,
     database: process.env.MYSQL_DATABASE,
     table: process.env.MYSQL_TABLE,
-    csvLocation: `${path.resolve()}/public`
+    csvLocation: `${path.resolve()}/public`,
 }

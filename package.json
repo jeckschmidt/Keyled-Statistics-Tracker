@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon server/index.js",
     "prod": "npm run build && node server/index.js",
-    "build": "esbuild public/frontend/homePage.js --bundle --minify --outfile=public/frontend/bundle.js"
+    "build": "esbuild public/frontend/homePage.js --bundle --minify --outfile=public/frontend/bundle.js --platform=browser --format=esm"
   },
   "nodemonConfig": {
     "ext": "js, html, css"
