@@ -19,8 +19,8 @@ body {
 
 .header {
     background-color:#36304a;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
     box-shadow: 0 4px 8px rgba(0,0,0,0,1);
     max-width: 100%;
     text-align: center;
@@ -79,12 +79,28 @@ body {
   width: 1400px;
 }
 
+#table_head th {
+  position: sticky;
+  top: 0;
+  background: #36304a;
+  z-index: 10;
+  box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+}
+
+#table_head th:first-child {
+  border-top-left-radius: 8px;
+}
+
+#table_head th:last-child {
+  border-top-right-radius: 8px;
+}
+
 table {
   border-spacing: 1;
   border-collapse: collapse;
   background: white;
   border-radius: 10px;
-  overflow: hidden;
+  overflow: visible;
   width: 90%;
   margin: 0 auto;
   position: relative;
