@@ -66,7 +66,7 @@ export async function tableToCSV() {
 export async function tableToJSON() {
     const pool = await getDatabasePool()
     const table = app.table
-    const query = `SELECT id, serial_number, hostname, flash_provision, status, bytes_written, program_version, flash_date
+    const query = `SELECT id, serial_number, reader_number, hostname, flash_provision, status, bytes_written, program_version, flash_date
         FROM ${table};`
     let results
     try {
