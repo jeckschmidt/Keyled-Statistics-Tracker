@@ -9,5 +9,5 @@ export const app = {
     database: process.env.MYSQL_DATABASE,
     table: process.env.MYSQL_TABLE,
     csvLocation: `${path.resolve()}/public`,
-    statusColumnIndex: 3
+    statusColumnIndex: 4
 }

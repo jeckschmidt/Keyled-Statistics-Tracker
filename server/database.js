@@ -25,7 +25,7 @@ export async function insertIntoTarget(values) {
     const pool = await getDatabasePool()
     const table = app.table
     const query = `INSERT INTO ${table}
-                   (serial_number, flash_status, bytes_written, program_version, target_RTC, flash_date, RTC_drift, flash_provision, hostname, reader_number, logs)
+                   (serial_number, status, bytes_written, program_version, target_RTC, flash_date, RTC_drift, flash_provision, hostname, reader_number, logs)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     let result
     try {
@@ -66,7 +66,7 @@ export async function tableToCSV() {
 export async function tableToJSON() {
     const pool = await getDatabasePool()
     const table = app.table
-    const query = `SELECT id, serial_number,  hostname, flash_status, bytes_written, program_version, flash_date, flash_provision
+    const query = `SELECT id, serial_number, hostname, flash_provision, status, bytes_written, program_version, flash_date
         FROM ${table};`
     let results
     try {
