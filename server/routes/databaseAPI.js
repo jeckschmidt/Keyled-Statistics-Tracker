@@ -1,7 +1,7 @@
 import express from 'express'
 import mysql from 'mysql2'
 import bodyParser from 'body-parser'
-import { insertIntoTarget, tableToCSV, getDatabasePool } from '../database.js'
+import { insertIntoTarget, tableToCSV, getDatabasePool, getEntryCount} from '../database.js'
 import { CustomError } from '../types/customError.js'
 
 const router = express.Router()
@@ -28,21 +28,15 @@ router.post('/insert/target', async (req,res,next)=> {
 
 router.get('/get-entry-count', async (req, res, next) => {
 
+    let count
     try {
-        const pool = await getDatabasePool()
-        const [rows] = await pool.query(
-            'SELECT id FROM target_information ORDER BY id DESC LIMIT 1'
-        );
-
-        if (rows.length > 0) {
-            const lastValue = rows[0].id;
-            res.status(200).json({count: lastValue})
-        } else {
-            res.status(200).json({count: 0})
-        }
+        count = await getEntryCount()
     } catch (err) {
-        next(new CustomError({origin: origin, details: "Failed to get DB entry count", cause: err}))
+        next(new CustomError({origin: origin, details: "Failed to get DB entry count", error: err ,cause: err}))
     }
+    res.status(200).json({count: count})
+
 })
+
 
 export default router

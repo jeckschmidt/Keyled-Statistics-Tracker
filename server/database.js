@@ -4,6 +4,7 @@ import fs from 'fs'
 import {parse} from 'json2csv'
 import path from 'path'
 import { getIo } from './websocket.js'
+import { CustomError } from './types/customError.js'
 
 let pool
 export async function getDatabasePool() {
@@ -24,8 +25,8 @@ export async function insertIntoTarget(values) {
     const pool = await getDatabasePool()
     const table = app.table
     const query = `INSERT INTO ${table}
-                   (serial_number, flash_status, bytes_written, program_version, target_RTC, flash_date, RTC_drift, flash_provision, hostname, reader_number)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                   (serial_number, flash_status, bytes_written, program_version, target_RTC, flash_date, RTC_drift, flash_provision, hostname, reader_number, logs)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     let result
     try {
         result = await pool.query(query, values)
@@ -66,7 +67,7 @@ export async function tableToJSON() {
     const table = app.table
     const query = `SELECT id, serial_number, reader_number, hostname, flash_status, bytes_written, program_version, flash_date, flash_provision
         FROM ${table};`
-    var results
+    let results
     try {
         [results] = await pool.query(query)
     } catch (err) {
@@ -74,7 +75,7 @@ export async function tableToJSON() {
     }
     
     const columnsTemp = results.length > 0 ? Object.keys(results[0]) : []
-    var rows = results.length > 0 ?results.map(row => Object.values(row)) : []
+    let rows = results.length > 0 ?results.map(row => Object.values(row)) : []
 
     const statusMap = {1: 'pass', 0: 'fail'}
     const statusIndex = 4
@@ -87,6 +88,30 @@ export async function tableToJSON() {
     return {rows: rows, columns: columns}
 
 }
+
+
+export async function getEntryCount() {
+
+    const pool = await getDatabasePool()
+    const table = app.table
+    const query = `SELECT id from ${table} ORDER BY id DESC LIMIT 1`
+    let rows
+    let lastValue
+
+    try {
+        [rows] = await pool.query(query)
+    } catch (err) {
+        throw err
+    }
+
+    if (rows.length > 0) {
+        lastValue = rows[0].id;
+        return lastValue
+    }
+    return 0
+}
+
+
 
 function capitalize(string) {
     return `${String(string).charAt(0).toUpperCase()}${String(string).slice(1)}`
