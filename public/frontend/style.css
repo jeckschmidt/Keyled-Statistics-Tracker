@@ -35,7 +35,7 @@ body {
 
 
 /* BUTTON */  
-.button {
+.button-downloadCSV {
     font-family: Georgia, 'Times New Roman', Times, serif;
     font-size: 20px;
     outline: none;
@@ -55,11 +55,11 @@ body {
     background-color: #36304a;
     color: ghostwhite;
   }
-  .button:hover {
+  .button-downloadCSV:hover {
     border-color: #f4f5f2;
     background: #cccccc;
   }
-  .button:active {
+  .button-downloadCSV:active {
     transform: scale(0.98);
     box-shadow: 0 0.5em 1.5em -0.5em hsla(249, 62%, 51%, 0.745);
   }
@@ -172,4 +172,9 @@ tbody tr:hover {
 
 #title {
   margin-right: 100px;
+}
+
+/* log button */
+.button-logs {
+  font-size: 20px
 }

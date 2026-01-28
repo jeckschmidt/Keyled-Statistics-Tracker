@@ -1,92 +1,104 @@
 import { io } from 'socket.io-client'
 
+/* ----------------------WEBSOCKETS----------------------------*/
+/* ----------------------------------------------------------- */
 const socket = io();
 let isRendered
 
 socket.on('init', (data) => {
     if (data.success == false) {
-        console.error("Could not reach the server")
+        console.error("Server couldn't send table")
         return
     }
-    const {columns, rows} = data.table
-    renderTable(columns, rows)
+    const {columns, rows, statusColumnIndex} = data.table
+    renderTable(columns, rows, statusColumnIndex)
 });
 
 socket.on('newRow', (data) => {
-    var row = data.newRow
-    appendRow(row)
+    if (data.success = false) {
+        console.error("Server couldn't send row")
+        return
+    }
+    const row = data.newRow
+    const statusColumnIndex = data.statusColumnIndex
+    appendRow(row, statusColumnIndex)
 });
+/* ----------------------------------------------------------- */
 
 
-function renderTable(columns, rows) {
+
+/* ----------------------TABLE RENDERING-----------------------*/
+/* ----------------------------------------------------------- */
+function renderTable(columns, rows, statusColumnIndex) {
 
     if (isRendered) {
         return
     }
-
     rows.reverse()
 
     // HEADERS
     const thead = document.getElementById('table_head')
 
-    // Create a <tr>
-    const tr = document.createElement('tr');
+    // Create a <tr>, a row for the columns names
+    const tr = document.createElement('tr')
     tr.classList.add('table100-head');
 
-    // Loop through columns and create <th> for each
+    // Loop through columns and create <th> for each, the individual column names
     columns.forEach(column => {
-        const th = document.createElement('th');
-        th.classList.add('table100-head');
+        const th = document.createElement('th')
+        th.classList.add('table100-head')
         th.textContent = column; // sets the text inside <th>
-        tr.appendChild(th);
+        tr.appendChild(th)
     });
-    // Append <tr> to <thead>
+
+    // Create extra "logs" column
+    const th = document.createElement('th')
+    th.classList.add('table100-head')
+    th.textContent = 'Logs'
+    tr.appendChild(th)
+
+    // Append <tr> to <thead>; appending the row to the table head
     thead.appendChild(tr)
 
     // ROWS OF DATA
     const tbody = document.getElementById('table_body')
     rows.forEach(row => {
-        const tr = document.createElement('tr');
-
-        row.forEach((data, colIndex) => {
-            const td = document.createElement('td');
-
-            if (colIndex === 4) {
-                // Create a <span> with conditional class
-                const span = document.createElement('span');
-                if (data === 'pass') span.classList.add('num-green');
-                else if (data === 'fail') span.classList.add('num-red');
-
-                span.textContent = data;
-                td.appendChild(span);
-            } else {
-                td.textContent = data;
-            }
-
-            tr.appendChild(td);
-        });
-
+        const tr = createTableRow(row, statusColumnIndex)
         tbody.appendChild(tr);
     })
     isRendered = true
 }
 
-function appendRow(row) {
-
-    console.log("append row function")
+function appendRow(row, statusColumnIndex) {
 
     const tbody = document.getElementById('table_body')
-    const tr = document.createElement('tr');
+    const tr = createTableRow(row, statusColumnIndex)
 
-    // console.log(typeof(row))
-    // row = Object.values(row)
-    // console.log(Array.isArray(row))
+    //tbody.append(tr) **** this is for descending order
+    tbody.prepend(tr);
+}
+/* ----------------------------------------------------------- */
+
+
+
+/* ----------------------LOG VIEWER--------------------------- */
+/* ----------------------------------------------------------- */
+
+
+/* ----------------------------------------------------------- */
+
+
+
+/* -------------------HELPER FUNCTIONS------------------------ */
+/* ----------------------------------------------------------- */
+
+function createTableRow(row, statusColumnIndex) {
+    const tr = document.createElement('tr');
 
     row.forEach((data, colIndex) => {
         const td = document.createElement('td');
-        console.log(data)
 
-        if (colIndex === 4) {
+        if (colIndex === statusColumnIndex) {
             // Create a <span> with conditional class
             const span = document.createElement('span');
             if (data === 'pass') span.classList.add('num-green');
@@ -97,10 +109,52 @@ function appendRow(row) {
         } else {
             td.textContent = data;
         }
-
         tr.appendChild(td);
-    });
-    tbody.prepend(tr);
+    })
 
-    console.log("function end")
+    // Create "Logs" button
+    const id = row[0]
+    const btn = createLogButton(id)
+    tr.appendChild(btn)
+
+    return tr
 }
+
+
+function createLogButton(id) {
+    let btn = document.createElement("BUTTON")
+    btn.id = id
+    btn.innerText = 'Button'
+    btn.classList.add('button-logs')
+
+    // do something on click
+    btn.addEventListener("click", async function(event) {
+        const log = await fetchLog(id)
+
+        if (log === null || log == "NULL") {
+            console.log(`No log available for entry ${id}`)
+            return
+        }
+        console.log(`log #${id}: ${log}`)
+    })
+    return btn
+}
+
+
+async function fetchLog(id) {
+    let log = null
+    try {
+        const response = await fetch(`/database/get-log/${id}`)
+        if (response.status != 200) {
+            console.log(`Couldn't retreive log: ${response}`)
+            return log
+        }
+        const data = await response.json()
+        log = data.logs
+        return log
+    } catch (err) {
+        console.error(err)
+        return log
+    }      
+}
+/* ----------------------------------------------------------- */
