@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon server/index.js",
     "prod": "npm run build && node server/index.js",
-    "build": "esbuild public/frontend/homePage.js --bundle --minify --outfile=public/frontend/bundle.js --platform=browser --format=esm"
+    "build": "node build.js"
   },
   "nodemonConfig": {
     "ext": "js, html, css"
@@ -17,6 +17,7 @@
   "dependencies": {
     "axios": "^1.7.9",
     "body-parser": "^1.20.3",
+    "codemirror": "^5.65.20",
     "dotenv": "^16.4.7",
     "env": "^0.0.2",
     "express": "^4.21.2",
