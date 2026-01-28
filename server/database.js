@@ -38,7 +38,8 @@ export async function insertIntoTarget(values) {
     let newRow = rows[rows.length - 1]
 
     let io = getIo()
-    io.emit('newRow', {newRow: newRow})
+    const statusColumnIndex = app.statusColumnIndex
+    io.emit('newRow', {newRow: newRow, statusColumnIndex: statusColumnIndex})
     return result
 }
 
@@ -65,7 +66,7 @@ export async function tableToCSV() {
 export async function tableToJSON() {
     const pool = await getDatabasePool()
     const table = app.table
-    const query = `SELECT id, serial_number, reader_number, hostname, flash_status, bytes_written, program_version, flash_date, flash_provision
+    const query = `SELECT id, serial_number,  hostname, flash_status, bytes_written, program_version, flash_date, flash_provision
         FROM ${table};`
     let results
     try {
@@ -78,14 +79,14 @@ export async function tableToJSON() {
     let rows = results.length > 0 ?results.map(row => Object.values(row)) : []
 
     const statusMap = {1: 'pass', 0: 'fail'}
-    const statusIndex = 4
+    const statusColumnIndex = app.statusColumnIndex
 
     for (const row of rows) {
-        row[statusIndex] = statusMap[row[statusIndex]] ?? row[statusIndex];
+        row[statusColumnIndex] = statusMap[row[statusColumnIndex]] ?? row[statusColumnIndex];
     }
     const columns = columnsTemp.map(processList)
 
-    return {rows: rows, columns: columns}
+    return {rows: rows, columns: columns, statusColumnIndex: statusColumnIndex}
 
 }
 
@@ -111,6 +112,27 @@ export async function getEntryCount() {
     return 0
 }
 
+
+export async function getLog(id) {
+    const pool = await getDatabasePool()
+    const table = app.table
+
+    const totalEntries = await getEntryCount()
+    if (id > totalEntries || id < 1) {
+        throw new CustomError({origin: "Database Manager", details: "Resource not found", message: `Id entry ${id} doesn't exist`, status: 404})
+    }
+
+    const query = `SELECT logs FROM ${table} WHERE id=${id};`
+    let logs
+
+    try {
+        [logs] = await pool.query(query)
+    } catch (err) {
+        throw err
+    }
+    
+    return logs[0]
+}
 
 
 function capitalize(string) {
