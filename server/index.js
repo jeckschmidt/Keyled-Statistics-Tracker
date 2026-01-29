@@ -8,6 +8,7 @@ import  { startWebSocketServer } from "./websocket.js"
 import { app as appConfig } from '../config.js'
 import { CustomError } from './types/customError.js'
 import { globalErrorHandler } from './middleware.js'
+import { fileURLToPath } from 'url'
 
 import homeRoute from './routes/app.js'
 import databaseRoute from './routes/databaseAPI.js'
@@ -15,7 +16,8 @@ import databaseRoute from './routes/databaseAPI.js'
 var app = express()
 
 const port = appConfig.port
-const homeDir = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 var server
 async function start(app, port) {
@@ -40,7 +42,7 @@ app.use(helmet())
 
 app.use('/home', homeRoute)
 app.use('/database', databaseRoute)
-app.use('/public', express.static('public'))
+app.use(express.static(path.join(__dirname, "..", "public")))
 
 // global error handling middlware
 app.use(globalErrorHandler)

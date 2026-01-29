@@ -1,14 +1,19 @@
 import express from 'express'
 import path from 'path'
 import { CustomError } from '../types/customError.js';
+import { fileURLToPath } from 'url';
 
 const router = express.Router()
 
+const __filename = fileURLToPath(import.meta.url);
+let __dirname = path.dirname(__filename);
+__dirname = path.join(__dirname, "../..", 'public')
+console.log(__dirname)
+
 let origin="App"
-const homeDir = path.resolve();
 router.get('/', (req,res,next) => {
     
-    var filePath = `${homeDir}/public/frontend/homePage.html`
+    var filePath = `${__dirname}/frontend/homePage.html`
     res.status(200).sendFile(filePath, (err) => {
         if (err) {
             if (err.code === "ENOENT") {
