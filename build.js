@@ -1,7 +1,7 @@
 import * as esbuild from "esbuild";
 
 await esbuild.build({
-  entryPoints: ["public/frontend/homePage.js"],
+  entryPoints: ["public/frontend/javascript/homePage.js"],
   bundle: true,
   minify: true,
   outfile: "public/frontend/bundle.js",
