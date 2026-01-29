@@ -1,4 +1,9 @@
 import { io } from 'socket.io-client'
+import CodeMirror from 'codemirror'
+
+import "./style.css"
+import "codemirror/lib/codemirror.css"
+import "codemirror/theme/material.css"
 
 /* ----------------------WEBSOCKETS----------------------------*/
 /* ----------------------------------------------------------- */
@@ -85,6 +90,48 @@ function appendRow(row, statusColumnIndex) {
 /* ----------------------------------------------------------- */
 
 
+let editor
+async function createLogPop(id, actionType) {
+    
+    // show the modal
+    const modal = document.getElementById('log-modal')
+    const modalTitle = document.getElementById('modal-title')
+
+    modalTitle.textContent = `${actionType} #${id} logs`
+    modal.style.display = 'flex'
+
+    // create the editor
+    const viewer = document.getElementById('log-viewer')
+    if (!editor) {
+        editor = CodeMirror(viewer, {
+            value: "Loading...",
+            readOnly: true,
+            mode: "text/plain",
+            viewportMargin: Infinity,
+            lineNumbers: true
+        })
+    } else {
+        editor.setValue("Loading....")
+    }
+    editor.refresh()
+
+    let logs = await fetchLog(id)
+    if (logs == "NULL") {
+      logs = "No logs available."
+    }
+
+    editor.setValue(logs)
+    editor.refresh()
+}
+document.getElementById("close-modal").addEventListener("click", () => {
+    if (editor) {
+        editor.setValue('')
+        editor.refresh()
+    }
+    document.getElementById("log-modal").style.display = "none";
+});
+
+
 /* ----------------------------------------------------------- */
 
 
@@ -114,35 +161,36 @@ function createTableRow(row, statusColumnIndex) {
 
     // Create "Logs" button
     const id = row[0]
-    const btn = createLogButton(id)
+    const actionType = row[4]
+    const btn = createLogButton(id, actionType)
     tr.appendChild(btn)
 
     return tr
 }
 
 
-function createLogButton(id) {
+function createLogButton(id, actionType) {
     let btn = document.createElement("BUTTON")
     btn.id = id
-    btn.innerText = 'Button'
-    btn.classList.add('button-logs')
+    btn.classList.add('logs-button')
+    btn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="32" height="32" fill="none" stroke="currentColor" stroke-width="4">
+        <line x1="8" y1="8" x2="8" y2="56" stroke-linecap="round"/>
+         <line x1="8" y1="56" x2="56" y2="56" stroke-linecap="round"/>
+        <line x1="20" y1="44" x2="56" y2="8" stroke-linecap="round"/>
+        <polyline points="44,8 56,8 56,20" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>`
 
-    // do something on click
-    btn.addEventListener("click", async function(event) {
-        const log = await fetchLog(id)
-
-        if (log === null || log == "NULL") {
-            console.log(`No log available for entry ${id}`)
-            return
-        }
-        console.log(`log #${id}: ${log}`)
+    btn.addEventListener("click", () => {
+        createLogPop(id, actionType)
     })
+
     return btn
 }
 
 
 async function fetchLog(id) {
-    let log = null
+    let log = "NULL"
     try {
         const response = await fetch(`/database/get-log/${id}`)
         if (response.status != 200) {

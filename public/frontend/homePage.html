@@ -6,7 +6,7 @@
         <title>mPOD </title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="public/frontend/style.css">
+        <link rel="stylesheet" href="public/frontend/bundle.css">
     </head>
     <body>
         <div class="header">
@@ -80,9 +80,20 @@
 
           <div class="center">
             <a href="../flashes.csv" download="keyled_flashes.csv">
-                <button class="button-downloadCSV"> Download as CSV</button>
+                <button id="button-downloadCSV"> Download as CSV</button>
             </a>
-         </div> 
+         </div>
+         
+         
+         <div id="log-modal">
+            <div id="modal-content">
+                <div id="modal-header">
+                    <span id="modal-title"></span>
+                    <span id="close-modal">&times;</span>
+                </div>
+                <div id="log-viewer"></div>
+            </div>
+        </div>
 
          <script src="public/frontend/bundle.js"> </script>
          

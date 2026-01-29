@@ -40,7 +40,7 @@ app.use(helmet())
 
 app.use('/home', homeRoute)
 app.use('/database', databaseRoute)
-app.use('/public', express.static('public', {maxAge: '1yr'}))
+app.use('/public', express.static('public'))
 
 // global error handling middlware
 app.use(globalErrorHandler)
