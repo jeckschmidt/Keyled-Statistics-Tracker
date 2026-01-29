@@ -2,6 +2,8 @@ import { io } from 'socket.io-client'
 import CodeMirror from 'codemirror'
 
 import "./style.css"
+import "codemirror/lib/codemirror.css"
+
 
 /* ----------------------WEBSOCKETS----------------------------*/
 /* ----------------------------------------------------------- */
