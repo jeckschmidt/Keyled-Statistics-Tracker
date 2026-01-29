@@ -91,14 +91,15 @@ function appendRow(row, statusColumnIndex) {
 
 
 let editor
+const modal = document.getElementById('log-modal')
 async function createLogPop(id, actionType) {
     
     // show the modal
-    const modal = document.getElementById('log-modal')
     const modalTitle = document.getElementById('modal-title')
 
     modalTitle.textContent = `${actionType} #${id} logs`
     modal.style.display = 'flex'
+    document.body.style.overflow = "hidden"
 
     // create the editor
     const viewer = document.getElementById('log-viewer')
@@ -123,12 +124,21 @@ async function createLogPop(id, actionType) {
     editor.setValue(logs)
     editor.refresh()
 }
+
 document.getElementById("close-modal").addEventListener("click", () => {
     if (editor) {
         editor.setValue('')
         editor.refresh()
     }
-    document.getElementById("log-modal").style.display = "none";
+    modal.style.display = "none"
+    document.body.style.overflow = "auto"
+});
+
+modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+        modal.style.display = "none"
+        document.body.style.overflow = "auto"
+    }
 });
 
 
