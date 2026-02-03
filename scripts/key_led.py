@@ -19,7 +19,7 @@ from gpiozero import Button, PWMLED, OutputDevice # LED
 # --------- GLOBAL VARIABLES -----------------
 # --------------------------------------------
 
-hostname = "https://waterless-jay-0522.dataplicity.io"
+hostname = ""
 apiKey=''
 pathToCache = '/home/pi/Jack/cache.txt'
 pathToLogs = '/home/pi/Mpod/flash_provision_logs'
@@ -52,7 +52,7 @@ def timedInput(prompt, timeout=20):
         return 'NULL'
     return user_input[0]
 
-def safeRequest(method, url, timeout=5, **kwargs):
+def safeRequest(method, url, timeout=60, **kwargs):
     try:
         return requests.request(method=method, url=url, timeout=timeout, **kwargs)
     except Exception as err:
@@ -148,7 +148,7 @@ class Prog( threading.Thread ):
         self.led_fault.off()
 
         # ask for reader number
-        readerNumber = timedInput("Enter Reader Number (20s timeout): ", 20)
+        readerNumber = timedInput("Enter Reader Number (60s timeout): ", 60)
         
         # modify the century bit #RC
         cmd = "sh century.sh"
@@ -287,7 +287,7 @@ class Prog( threading.Thread ):
         res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         deviceHostname = res.stdout.strip()
         if not deviceHostname:
-            device_hostname = "NULL"
+            deviceHostname = "NULL"
 
         # Get the RTC drift if the raspberry pi clock was accessed
         RTCDrift = "NULL"
@@ -368,7 +368,7 @@ class Prog( threading.Thread ):
                       "flash_date": currDateTime,
                       "RTC_drift": RTCDrift,
                       "flash_provision": actionType,
-                      "hostname": device_hostname,
+                      "hostname": deviceHostname,
                       "reader_number": readerNumber,
                       "logs": "NULL"
                     }
@@ -391,11 +391,11 @@ class Prog( threading.Thread ):
             status_code = response.status_code
             data = response.json()
             if status_code != 200:
-                print(f"[KEYLED] {RED} Unable to update remote database: {data} {RESET}", flush=True)
+                print(f"[KEYLED]{RED} Unable to update remote database: {data} {RESET}", flush=True)
             else:
-                print(f"[KEYLED] {GREEN} Remote database successfully updated: {data} {RESET}", flush=True)
+                print(f"[KEYLED]{GREEN} Remote database successfully updated: {data} {RESET}", flush=True)
         else:
-            print(f'[KEYLED] {RED} Unable to update remote database: Connection timed out {RESET}', flush=True)
+            print(f'[KEYLED]{RED} Unable to update remote database: Connection timed out {RESET}', flush=True)
         
 
         # Copy cache (cache is the output of flash.sh) to log file
