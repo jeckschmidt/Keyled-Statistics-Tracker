@@ -58,9 +58,10 @@ jobs:
           script: |
             set -e
 
-            export IMAGE_TAG=${{ github.sha }}
             export ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
             export ECR_REPOSITORY=provisioning-and-flashing-tracker
+            export IMAGE_TAG=${{ github.sha }}
+            export IMAGE=$ECR_REGISTRY/$ECR_REPOSITORY/$IMAGE_TAG
 
             cd provisioning-and-flashing-tracker/
 
@@ -72,5 +73,8 @@ jobs:
 
             echo "Restarting docker container..."
             docker compose up -d --remove-orphans
+
+            echo "Cleaning up unused docker images..."
+            docker system prune -af
 
             echo "Deployment complete!"
