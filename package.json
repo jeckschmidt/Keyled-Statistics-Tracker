@@ -5,9 +5,8 @@
   "type": "module",
   "main": "./server/index.js",
   "scripts": {
-    "dev": "nodemon server/index.js",
-    "prod": "npm run build && node server/index.js",
-    "build": "node build.js"
+    "build": "node build.js",
+    "start": "npm run build && node server/index.js"
   },
   "nodemonConfig": {
     "ext": "js, html, css"
@@ -20,6 +19,7 @@
     "codemirror": "^5.65.20",
     "dotenv": "^16.4.7",
     "env": "^0.0.2",
+    "esbuild": "^0.27.2",
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
     "helmet": "^8.0.0",
@@ -31,7 +31,6 @@
     "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
-    "esbuild": "^0.27.2",
     "nodemon": "^3.1.11"
   }
 }
