@@ -8,7 +8,6 @@ const router = express.Router()
 const __filename = fileURLToPath(import.meta.url);
 let __dirname = path.dirname(__filename);
 __dirname = path.join(__dirname, "../..", 'public')
-console.log(__dirname)
 
 let origin="App"
 router.get('/', (req,res,next) => {

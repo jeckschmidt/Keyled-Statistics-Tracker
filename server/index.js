@@ -35,10 +35,11 @@ async function start(app, port) {
         await sleep(1)
         console.log(`[PROCESS] Express server listening on ${bind}`)
     })
-    return server.listen(port)
+    return server.listen({port: port, host: "0.0.0.0"})
 }
 
-app.use(helmet())
+// app.use(helmet())
+app.set('trust proxy', true)
 
 app.use('/home', homeRoute)
 app.use('/database', databaseRoute)
