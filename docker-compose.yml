@@ -1,0 +1,14 @@
+services:
+  app:
+    image: ${IMAGE_TAG}
+    container_name: provisioning-and-flashing-tracker
+    env_file:
+    - ./.env
+    ports:
+      - 3000:3000
+    networks:
+      - app-network   
+
+networks:
+  app-network:
+    driver: bridge

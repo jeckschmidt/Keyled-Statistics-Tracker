@@ -1,0 +1,11 @@
+/.env
+/.env.docker
+/node_modules
+/keyled_db.sql
+/ec2-3-80-53-107.compute-1.amazonaws.com
+/provisioning-and-flashing-tracker-pub-key.pem
+/keyled-statistics-tracker-PERSONAL.pem
+/us-east-1-bundle.pem
+/public/frontend/bundle.js
+/public/frontend/bundle.css
+/public/flashes.csv
