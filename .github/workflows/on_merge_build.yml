@@ -54,10 +54,11 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: IMAGE_TAG, ECR_REGISTRY
+          envs: IMAGE_TAG, ECR_REGISTRY, ECR_REPOSITORY
           script: |
             export IMAGE_TAG=${{ github.sha }}
             export ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
+            export ECR_REPOSITORY=provisioning-and-flashing-tracker
 
             cd provisioning-and-flashing-tracker/
 
