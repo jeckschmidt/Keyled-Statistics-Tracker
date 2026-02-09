@@ -6,12 +6,13 @@ import helmet from 'helmet'
 import { sleep } from './helpers.js'
 import  { startWebSocketServer } from "./websocket.js"
 import { app as appConfig } from '../config.js'
-import { CustomError } from './types/customError.js'
 import { globalErrorHandler } from './middleware.js'
 import { fileURLToPath } from 'url'
+import { tableToCSV } from './database.js'
 
 import homeRoute from './routes/app.js'
 import databaseRoute from './routes/databaseAPI.js'
+import { table } from 'console'
 
 var app = express()
 
@@ -25,6 +26,13 @@ async function start(app, port) {
 
     // start websocket server
     startWebSocketServer(server);
+
+    // make flashes.csv accessible
+    try {
+        await tableToCSV()
+    } catch (err) {
+        console.error("[SERVER ERROR] Couldn't create flashes.csv on startup:", err)
+    }
 
     server.on('listening', async ()=>{
         const addr = server.address()

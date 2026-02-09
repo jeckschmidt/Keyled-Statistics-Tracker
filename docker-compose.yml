@@ -1,6 +1,6 @@
 services:
   app:
-    image: ${IMAGE_TAG}
+    image: ${IMAGE}
     container_name: provisioning-and-flashing-tracker
     env_file:
     - ./.env

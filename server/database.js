@@ -45,7 +45,9 @@ export async function insertIntoTarget(values) {
 
 export async function tableToCSV() {
     const pool = await getDatabasePool()
-    const query = "SELECT * FROM target_information"
+    const table = app.table
+    const query = `SELECT id, serial_number, reader_number, hostname, flash_provision, status, bytes_written, program_version, flash_date
+        FROM ${table};`
     
     let rows
     try {
