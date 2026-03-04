@@ -3,16 +3,17 @@ import http from 'http'
 import dotenv from 'dotenv/config'
 import path from 'path'
 import helmet from 'helmet'
-import { sleep } from './helpers.js'
-import  { startWebSocketServer } from "./websocket.js"
+import { fileURLToPath } from 'url'
+
+import  { startWebSocketServer } from "./controllers/websocket.js"
 import { app as appConfig } from '../config.js'
 import { globalErrorHandler } from './middleware.js'
-import { fileURLToPath } from 'url'
-import { tableToCSV } from './database.js'
+import { sleep } from './controllers/helpers.js'
+import { tableToCSV } from './controllers/database.js'
 
 import homeRoute from './routes/app.js'
-import databaseRoute from './routes/databaseAPI.js'
-import { table } from 'console'
+import databaseRoute from './routes/database.js'
+// import { table } from 'console'
 
 var app = express()
 

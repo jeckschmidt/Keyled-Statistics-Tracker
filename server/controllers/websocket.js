@@ -9,7 +9,7 @@ export function startWebSocketServer(server) {
     io.on('connection', async (socket) => {
         // Send JSON on connect
         try {
-            var table = await tableToJSON()
+            var table = await tableToJSON(false)
             socket.emit('init', {success: true, table: table})
         } catch (err) {
             socket.emit('init', {success: false})

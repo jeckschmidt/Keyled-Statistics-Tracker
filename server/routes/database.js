@@ -1,8 +1,9 @@
 import express from 'express'
 import mysql from 'mysql2'
 import bodyParser from 'body-parser'
-import { insertIntoTarget, tableToCSV, getDatabasePool, getEntryCount, getLog } from '../database.js'
-import { CustomError } from '../types/customError.js'
+
+import { insertIntoTarget, tableToCSV, getEntryCount, getLog } from '../controllers/database.js'
+import { CustomError } from '../types/error.js'
 
 const router = express.Router()
 router.use(bodyParser.json())

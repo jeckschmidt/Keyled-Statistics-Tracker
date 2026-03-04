@@ -1,4 +1,4 @@
-import { CustomError } from "./types/customError.js"
+import { CustomError } from "./types/error.js"
 
 // global error handling middlware
 export function globalErrorHandler(err, req, res, next) {

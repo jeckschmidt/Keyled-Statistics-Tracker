@@ -1,7 +1,8 @@
 import express from 'express'
 import path from 'path'
-import { CustomError } from '../types/customError.js';
 import { fileURLToPath } from 'url';
+
+import { CustomError } from '../types/error.js';
 
 const router = express.Router()
 

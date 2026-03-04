@@ -1,13 +1,14 @@
 import mysql from 'mysql2'
-import { app } from '../config.js'
 import fs from 'fs'
 import {parse} from 'json2csv'
 import path from 'path'
+
 import { getIo } from './websocket.js'
-import { CustomError } from './types/customError.js'
+import { CustomError } from '../types/error.js'
+import { app } from '../../config.js'
 
 let pool
-export async function getDatabasePool() {
+async function getDatabasePool() {
     if (!pool) {
         pool = mysql.createPool({
             host: app.host,
@@ -20,21 +21,82 @@ export async function getDatabasePool() {
     return pool
 }
 
+/**
+ * @summary Generic function for inserting new row into a table
+ * @param {string} table - The table to update
+ * @param {string[]} rows - All of the column values that will make up the rows
+ * @param {any[]} values - Ordered, the values to be inserted; correlated to rows
+ * @return
+ */
+async function tableInsert(table, rows, values) {
+    const pool = await getDatabasePool()
+    const tableRows = rows.join(", ")
+    const tableValues = ("?".repeat(rows.length)).split("").join(",")
+    const query = `INSERT INTO ${table}
+                    (${tableRows})
+                    VALUES (${tableValues})`
+
+    try {
+        const result = await pool.query(query, values)
+        return result
+    } catch (err) {
+        throw err
+    }
+}
+
+/**
+ * @summary Generic function for getting one entry from a table
+ * @param {string} table - The table to update
+ * @param {string[]} columns - Which columns are wanted
+ * @returns {object[]} Returns list of all entries
+ */
+async function getTableAllRows(table, columns=null, isAll=true) {
+    const pool = await getDatabasePool()
+    try {
+        const tableColumns = (isAll) ? '*' : columns.join(",")
+        const query = `SELECT ${tableColumns} FROM ${table}`
+        const [entries, _] = await pool.query(query)
+        return entries
+    } catch (err) {
+        throw err
+    }
+}
+ 
+
+/**
+ * @summary Generic function for getting one entry from a table
+ * @param {string} table - The table to update
+ * @param {{column: string, value}} key - The key for the entry; ... WHERE column=value 
+ * @param {string[]} columns - Which columns are wanted
+ * @returns {object[]} JSON entry inside a list
+ */
+async function getTableEntry(table, key, columns) {
+    const pool = await getDatabasePool()
+    const tableColumns = columns.join(",")
+    const query = `SELECT ${tableColumns}
+                   FROM ${table}
+                   WHERE ${key.column}=${key.value}`
+    
+    try {
+        const [entry, _] = await pool.query(query)
+        return entry
+    } catch (err) {
+        throw err
+    }
+}
+
 
 export async function insertIntoTarget(values) {
-    const pool = await getDatabasePool()
-    const table = app.table
-    const query = `INSERT INTO ${table}
-                   (serial_number, status, bytes_written, program_version, target_RTC, flash_date, RTC_drift, flash_provision, hostname, reader_number, logs)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    const table = app.targetTable
+    const tableRows = app.targetTableColumns
     let result
     try {
-        result = await pool.query(query, values)
+        await tableInsert(table, tableRows, values)
     } catch (err) {
         throw err
     }
 
-    let {rows, columns} = await tableToJSON()
+    let {rows, columns} = await tableToJSON(true)
     let newRow = rows[rows.length - 1]
 
     let io = getIo()
@@ -43,15 +105,23 @@ export async function insertIntoTarget(values) {
     return result
 }
 
+
 export async function tableToCSV() {
-    const pool = await getDatabasePool()
-    const table = app.table
-    const query = `SELECT id, serial_number, reader_number, hostname, flash_provision, status, bytes_written, program_version, flash_date
-        FROM ${table};`
-    
-    let rows
+    const table = app.targetTable
+    const columns = [
+        "id",
+        "serial_number",
+        "reader_number",
+        "hostname",
+        "flash_provision",
+        "status",
+        "bytes_written",
+        "program_version",
+        "flash_date"
+    ]
+
     try {
-        rows = (await pool.query(query))[0]
+        var rows = await getTableAllRows(table, columns, false)
     } catch (err) {
         throw err
     }
@@ -65,18 +135,27 @@ export async function tableToCSV() {
 }
 
 
+let inMemTable
 export async function tableToJSON() {
-    const pool = await getDatabasePool()
-    const table = app.table
-    const query = `SELECT id, serial_number, reader_number, hostname, flash_provision, status, bytes_written, program_version, flash_date
-        FROM ${table};`
-    let results
+
+    const table = app.targetTable
+    const tableColumns = [
+        "id",
+        "serial_number",
+        "reader_number",
+        "hostname",
+        "flash_provision",
+        "status",
+        "bytes_written",
+        "program_version",
+        "flash_date"
+    ]
     try {
-        [results] = await pool.query(query)
+        var results = await getTableAllRows(table, tableColumns, false)
     } catch (err) {
         throw err
     }
-    
+
     const columnsTemp = results.length > 0 ? Object.keys(results[0]) : []
     let rows = results.length > 0 ?results.map(row => Object.values(row)) : []
 
@@ -88,7 +167,8 @@ export async function tableToJSON() {
     }
     const columns = columnsTemp.map(processList)
 
-    return {rows: rows, columns: columns, statusColumnIndex: statusColumnIndex}
+    inMemTable = {rows: rows, columns: columns, statusColumnIndex: statusColumnIndex}
+    return inMemTable
 
 }
 
@@ -96,7 +176,7 @@ export async function tableToJSON() {
 export async function getEntryCount() {
 
     const pool = await getDatabasePool()
-    const table = app.table
+    const table = app.targetTable
     const query = `SELECT id from ${table} ORDER BY id DESC LIMIT 1`
     let rows
     let lastValue
@@ -116,24 +196,26 @@ export async function getEntryCount() {
 
 
 export async function getLog(id) {
-    const pool = await getDatabasePool()
-    const table = app.table
+    // const pool = await getDatabasePool()
+    // const table = app.targetTable
 
     const totalEntries = await getEntryCount()
     if (id > totalEntries || id < 1) {
         throw new CustomError({origin: "Database Manager", details: "Resource not found", message: `Id entry ${id} doesn't exist`, status: 404})
     }
 
-    const query = `SELECT logs FROM ${table} WHERE id=${id};`
-    let logs
+    const table = app.targetTable
+    const key = {
+        column: "id",
+        value: id
+    }
 
     try {
-        [logs] = await pool.query(query)
+        var log = await getTableEntry(table, key, ["logs"])
+        return log[0]
     } catch (err) {
         throw err
     }
-    
-    return logs[0]
 }
 
 
