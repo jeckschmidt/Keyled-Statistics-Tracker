@@ -23,15 +23,15 @@ async function getDatabasePool() {
 
 /**
  * @summary Generic function for inserting new row into a table
- * @param {string} table - The table to update
- * @param {string[]} rows - All of the column values that will make up the rows
+ * @param {string} table - The table to query
+ * @param {string[]} columns - All of the column values that will make up the rows
  * @param {any[]} values - Ordered, the values to be inserted; correlated to rows
  * @return
  */
-async function tableInsert(table, rows, values) {
+async function tableInsert(table, columns, values) {
     const pool = await getDatabasePool()
-    const tableRows = rows.join(", ")
-    const tableValues = ("?".repeat(rows.length)).split("").join(",")
+    const tableRows = columns.join(", ")
+    const tableValues = ("?".repeat(columns.length)).split("").join(",")
     const query = `INSERT INTO ${table}
                     (${tableRows})
                     VALUES (${tableValues})`
@@ -46,10 +46,11 @@ async function tableInsert(table, rows, values) {
 
 /**
  * @summary Generic function for getting one entry from a table
- * @param {string} table - The table to update
+ * @param {string} table - The table to query
  * @param {string[]} columns - Which columns are wanted
  * @returns {object[]} Returns list of all entries
  */
+
 async function getTableAllRows(table, columns=null, isAll=true) {
     const pool = await getDatabasePool()
     try {
@@ -65,7 +66,7 @@ async function getTableAllRows(table, columns=null, isAll=true) {
 
 /**
  * @summary Generic function for getting one entry from a table
- * @param {string} table - The table to update
+ * @param {string} table - The table to query
  * @param {{column: string, value}} key - The key for the entry; ... WHERE column=value 
  * @param {string[]} columns - Which columns are wanted
  * @returns {object[]} JSON entry inside a list
@@ -103,6 +104,35 @@ export async function insertIntoTarget(values) {
     const statusColumnIndex = app.statusColumnIndex
     io.emit('newRow', {newRow: newRow, statusColumnIndex: statusColumnIndex})
     return result
+}
+
+
+export async function insertIntoSecrets(user, hashed_key) {
+    const table = app.secretsTable
+    const columns = app.secretsTableColumns
+    const values = [hashed_key, user]
+
+    try {
+        await tableInsert(table, columns, values)
+    } catch (err) {
+        throw err
+    }
+}
+
+
+export async function getHashedKeys() {
+
+    const table = app.secretsTable
+    const columns = ["hashed_secret"]
+    
+    try {
+        let temp = await getTableAllRows(table, columns)
+        const hashedKeys = temp.map(temp => temp.hashed_secret) 
+
+        return hashedKeys
+    } catch (err) {
+        throw err
+    }
 }
 
 
