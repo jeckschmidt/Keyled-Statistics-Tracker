@@ -34,5 +34,6 @@ export const app = {
     secretsTableColumns: secretTableColumns,
 
     csvLocation: `${path.resolve()}/public`,
-    statusColumnIndex: 5
+    statusColumnIndex: 5,
+    readerNumberColumnIndex: 2
 }

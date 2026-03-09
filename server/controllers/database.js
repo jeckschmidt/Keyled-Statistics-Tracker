@@ -50,7 +50,6 @@ async function tableInsert(table, columns, values) {
  * @param {string[]} columns - Which columns are wanted
  * @returns {object[]} Returns list of all entries
  */
-
 async function getTableAllRows(table, columns=null, isAll=true) {
     const pool = await getDatabasePool()
     try {
@@ -87,10 +86,13 @@ async function getTableEntry(table, key, columns) {
 }
 
 
+/**
+ * @summary Inserts an entry into the target information table
+ * @param {any[]} values - The table to query
+ */
 export async function insertIntoTarget(values) {
     const table = app.targetTable
     const tableRows = app.targetTableColumns
-    let result
     try {
         await tableInsert(table, tableRows, values)
     } catch (err) {
@@ -103,10 +105,14 @@ export async function insertIntoTarget(values) {
     let io = getIo()
     const statusColumnIndex = app.statusColumnIndex
     io.emit('newRow', {newRow: newRow, statusColumnIndex: statusColumnIndex})
-    return result
 }
 
 
+/**
+ * @summary Inserts new entry into secrets table
+ * @param {string} table - User of the secret
+ * @param {string[]} columns - The hashed secret of the user
+ */
 export async function insertIntoSecrets(user, hashed_key) {
     const table = app.secretsTable
     const columns = app.secretsTableColumns
@@ -120,6 +126,9 @@ export async function insertIntoSecrets(user, hashed_key) {
 }
 
 
+/**
+ * @summary Gets all of the hashed secrets in the secrets table
+ */
 export async function getHashedKeys() {
 
     const table = app.secretsTable
@@ -136,6 +145,9 @@ export async function getHashedKeys() {
 }
 
 
+/**
+ * @summary Converts the target information table into a .csv file (omits logs)
+ */
 export async function tableToCSV() {
     const table = app.targetTable
     const columns = [
@@ -164,7 +176,9 @@ export async function tableToCSV() {
     }
 }
 
-
+/**
+ * @summary Converts the target information table into a JSON (omits logs)
+ */
 let inMemTable
 export async function tableToJSON() {
 
@@ -191,18 +205,28 @@ export async function tableToJSON() {
 
     const statusMap = {1: 'pass', 0: 'fail'}
     const statusColumnIndex = app.statusColumnIndex
+    const readerNumberColumnIndex = app.readerNumberColumnIndex
 
     for (const row of rows) {
         row[statusColumnIndex] = statusMap[row[statusColumnIndex]] ?? row[statusColumnIndex];
     }
     const columns = columnsTemp.map(processList)
 
-    inMemTable = {rows: rows, columns: columns, statusColumnIndex: statusColumnIndex}
+    inMemTable = {
+        rows: rows,
+        columns: columns,
+        statusColumnIndex: statusColumnIndex,
+        readerNumberColumnIndex: readerNumberColumnIndex
+    }
     return inMemTable
 
 }
 
 
+/**
+ * @summary Gets the amount of entries in target information
+ * @returns {int} entryCount - The number of entries 
+ */
 export async function getEntryCount() {
 
     const pool = await getDatabasePool()
@@ -225,6 +249,11 @@ export async function getEntryCount() {
 }
 
 
+/**
+ * @summary Gets the log associated with an id
+ * @param {int} id - The primary key of the target information table
+ * @returns {string} - The esptool.py log
+ */
 export async function getLog(id) {
     // const pool = await getDatabasePool()
     // const table = app.targetTable
@@ -249,6 +278,27 @@ export async function getLog(id) {
 }
 
 
+/**
+ * @summary Updates the reader number of the associated id
+ * @param {int} id - The primary key of the table
+ * @param {string} readerNumber - New reader number
+ */
+export async function updateReaderNumber(id, readerNumber) {
+    const pool = await getDatabasePool()
+    const table = app.targetTable
+    const query = `UPDATE ${table}
+                   SET reader_number="${readerNumber}"
+                   WHERE id=${id}`
+
+    try {
+        await pool.query(query)
+    } catch (err) {
+        throw err
+    }
+}
+
+
+/* helpers */
 function capitalize(string) {
     return `${String(string).charAt(0).toUpperCase()}${String(string).slice(1)}`
 }

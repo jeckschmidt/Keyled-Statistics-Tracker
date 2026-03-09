@@ -2,7 +2,7 @@ import express from 'express'
 import mysql from 'mysql2'
 import bodyParser from 'body-parser'
 
-import { insertIntoTarget, tableToCSV, getEntryCount, getLog } from '../controllers/database.js'
+import { insertIntoTarget, tableToCSV, getEntryCount, getLog, updateReaderNumber } from '../controllers/database.js'
 import { CustomError } from '../types/error.js'
 import { apiAuth } from '../middleware.js'
 
@@ -10,6 +10,8 @@ const router = express.Router()
 router.use(bodyParser.json())
 
 let origin = "Database API"
+
+
 /**
  * @route POST /database/insert/target
  * @summary Populate a new row in the target_information database
@@ -36,7 +38,7 @@ router.post('/insert/target', apiAuth, async (req, res, next)=> {
 /**
  * @route GET /database/get-entry-count
  * @summary Get the total entry count in the database
- * @returns {count: count}
+ * @returns {int} - Number of entries
  */
 router.get('/get-entry-count', apiAuth, async (req, res, next) => {
 
@@ -50,11 +52,12 @@ router.get('/get-entry-count', apiAuth, async (req, res, next) => {
 
 })
 
+
 /**
  * @route GET /database/get-log
  * @summary Get the logs associated with an entry id
  * @param {string} id - The id of the entry
- * @returns {id: id}
+ * @returns {string} - The log associated with the id
  */
 router.get('/get-log/:id', async (req, res, next) => {
     const id = req.params.id
@@ -71,5 +74,25 @@ router.get('/get-log/:id', async (req, res, next) => {
 
     res.status(200).json(log)
 })
+
+
+/**
+ * @route POST /database/update-reader-number
+ * @summary Update a reader number of the associated id
+ * @param {int} readerNumber - The new reader number to be entered
+ */
+router.post('/update-reader-number/:id', async (req, res, next) => {
+    const id = req.params.id
+    const readerNumber = req.body.readerNumber
+
+    try {
+        await updateReaderNumber(id, readerNumber)
+    } catch (err) {
+        return next(new CustomError({origin: origin, details: `Failed to update reader number`, error: err, cause: err}))
+    }
+
+    res.status(200).json({message: "Success"})
+})
+
 
 export default router

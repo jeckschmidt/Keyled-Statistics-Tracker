@@ -15,8 +15,8 @@ socket.on('init', (data) => {
         console.error("Server couldn't send table")
         return
     }
-    const {columns, rows, statusColumnIndex} = data.table
-    renderTable(columns, rows, statusColumnIndex)
+    const {columns, rows, statusColumnIndex, readerNumberColumnIndex} = data.table
+    renderTable(columns, rows, statusColumnIndex, readerNumberColumnIndex)
 });
 
 socket.on('newRow', (data) => {
@@ -34,7 +34,7 @@ socket.on('newRow', (data) => {
 
 /* ----------------------TABLE RENDERING-----------------------*/
 /* ----------------------------------------------------------- */
-function renderTable(columns, rows, statusColumnIndex) {
+function renderTable(columns, rows, statusColumnIndex, readerNumberColumnIndex) {
 
     if (isRendered) {
         return
@@ -68,7 +68,7 @@ function renderTable(columns, rows, statusColumnIndex) {
     // ROWS OF DATA
     const tbody = document.getElementById('table_body')
     rows.forEach(row => {
-        const tr = createTableRow(row, statusColumnIndex)
+        const tr = createTableRow(row, statusColumnIndex, readerNumberColumnIndex)
         tbody.appendChild(tr);
     })
     isRendered = true
@@ -149,22 +149,69 @@ modal.addEventListener("click", (event) => {
 /* -------------------HELPER FUNCTIONS------------------------ */
 /* ----------------------------------------------------------- */
 
-function createTableRow(row, statusColumnIndex) {
+function createTableRow(row, statusColumnIndex, readerNumberColumnIndex) {
     const tr = document.createElement('tr');
 
     row.forEach((data, colIndex) => {
         const td = document.createElement('td');
 
-        if (colIndex === statusColumnIndex) {
-            // Create a <span> with conditional class
-            const span = document.createElement('span');
-            if (data === 'pass') span.classList.add('num-green');
-            else if (data === 'fail') span.classList.add('num-red');
+        /* if reader number, make editable and capture changes */
+        if (colIndex === readerNumberColumnIndex) {
 
-            span.textContent = data;
-            td.appendChild(span);
-        } else {
-            td.textContent = data;
+            td.contentEditable = 'plaintext-only'
+            td.textContent = data
+            td.dataset.original = td.textContent
+
+            td.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    console.log('enter key pressed')
+
+                    e.preventDefault()
+                    td.blur()
+                }
+                if (e.key === "Escape") {
+                    console.log('escape key pressed')
+
+                    td.textContent = td.dataset.original
+                    td.blur()
+                }
+            })
+
+            td.addEventListener("blur", async () => {
+                const readerNumber = td.textContent.trim()
+
+                if (readerNumber !== td.dataset.original) {
+
+                    /* get the id of the entry */
+                    const id = td.parentElement.children[0].textContent
+                    
+                    /* commit the change */
+                    try {
+                        await updateReaderNumber(id, readerNumber)
+                    } catch (err) {
+                        console.log("couldn't update reader number:", err)
+                    }
+
+                    td.dataset.original = readerNumber
+
+                } else {
+                    td.textContent = td.dataset.original
+                }
+            })
+        } 
+
+        /* if status, add color */
+        else if (colIndex === statusColumnIndex) {
+            let span = document.createElement('span')
+            if (data === 'pass') span.classList.add('num-green')
+            else if (data === 'fail') span.classList.add('num-red')
+
+            span.textContent = data
+            td.appendChild(span)
+        } 
+        
+        else {
+            td.textContent = data
         }
         tr.appendChild(td);
     })
@@ -215,4 +262,22 @@ async function fetchLog(id) {
         return log
     }      
 }
+
+
+async function updateReaderNumber(id, readerNumber) {
+    
+    const response = await fetch(`/database/update-reader-number/${id}`, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({readerNumber: readerNumber})
+    })
+    if (response.status != 200) {
+        console.error("Couldn't update reader number:", err)
+    }
+    
+}
+
+
 /* ----------------------------------------------------------- */
