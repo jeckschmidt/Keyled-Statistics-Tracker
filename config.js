@@ -15,6 +15,11 @@ const targetTableColumns = [
     "logs"
 ]
 
+const secretTableColumns = [
+    "hashed_secret",
+    "user"
+]
+
 export const app = {
     port: process.env.PORT,
     host: process.env.MYSQL_HOST,
@@ -24,6 +29,9 @@ export const app = {
 
     targetTable: process.env.MYSQL_TABLE_TARGET,
     targetTableColumns: targetTableColumns,
+
+    secretsTable: process.env.MYSQL_TABLE_SECRETS,
+    secretsTableColumns: secretTableColumns,
 
     csvLocation: `${path.resolve()}/public`,
     statusColumnIndex: 5

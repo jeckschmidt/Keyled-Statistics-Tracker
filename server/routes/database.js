@@ -4,6 +4,7 @@ import bodyParser from 'body-parser'
 
 import { insertIntoTarget, tableToCSV, getEntryCount, getLog } from '../controllers/database.js'
 import { CustomError } from '../types/error.js'
+import { apiAuth } from '../middleware.js'
 
 const router = express.Router()
 router.use(bodyParser.json())
@@ -14,7 +15,7 @@ let origin = "Database API"
  * @summary Populate a new row in the target_information database
  * @param {object} row - All of the column values that will make up the row
  */
-router.post('/insert/target', async (req,res,next)=> {
+router.post('/insert/target', apiAuth, async (req, res, next)=> {
     console.log("[Database API] New entry requested to be entered....")
     var body = req.body
 
@@ -37,7 +38,7 @@ router.post('/insert/target', async (req,res,next)=> {
  * @summary Get the total entry count in the database
  * @returns {count: count}
  */
-router.get('/get-entry-count', async (req, res, next) => {
+router.get('/get-entry-count', apiAuth, async (req, res, next) => {
 
     let count
     try {

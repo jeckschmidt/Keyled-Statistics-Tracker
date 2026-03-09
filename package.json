@@ -22,6 +22,7 @@
     "esbuild": "^0.27.2",
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
+    "generate-api-key": "^1.0.2",
     "helmet": "^8.0.0",
     "https": "^1.0.0",
     "json2csv": "^6.0.0-alpha.2",

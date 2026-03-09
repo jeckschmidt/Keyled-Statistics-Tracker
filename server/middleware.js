@@ -1,4 +1,6 @@
 import { CustomError } from "./types/error.js"
+import { getHashedKeys } from './controllers/database.js'
+import { compareHash} from './controllers/auth.js'
 
 // global error handling middlware
 export function globalErrorHandler(err, req, res, next) {
@@ -10,8 +12,31 @@ export function globalErrorHandler(err, req, res, next) {
         })
     }
 
-    console.err("[Error Handler] Unexpected error:", err)
+    console.error("[Error Handler] Unexpected error:", err)
     return res.status(500).json({
         message: "Internal Server Error"
     })
+}
+
+
+export async function apiAuth(req, res, next) {
+
+    // get api key from header
+    const key = req.headers['x-api-key']
+    if (!key) {
+        return res.status(401).json({message: "No authorization provided"})
+    }
+
+    // get list of hashed keys
+    const hashedKeys = await getHashedKeys()
+
+    // hash the key and check against the list of keys
+    for (let hashedKey of hashedKeys) {
+        if (compareHash(key, hashedKey)) {
+            return next()
+        }
+    }
+
+    // return 401 if it doesn't match
+    res.status(401).json({message: "Invalid authorization"})
 }
