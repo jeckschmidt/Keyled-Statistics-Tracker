@@ -1,19 +1,18 @@
 import dotenv from 'dotenv/config'
 import path from 'path'
 
-const targetTableColumns = [
-    "serial_number",
-    "status",
-    "bytes_written",
-    "program_version",
-    "target_RTC",
-    "flash_date",
-    "RTC_drift",
-    "flash_provision",
-    "hostname", 
-    "reader_number",
-    "logs"
-]
+const targetTableCols = {
+    macAddress: "MAC_address",
+    provisionStatus: "provision_status",
+    rtcStatus: "RTC_status",
+    programVersion: "program_version",
+    date: "date",
+    flashProvision: "flash_provision",
+    hostname: "hostname",
+    readerNumber: "reader_number",
+    active: "is_active",
+    logs: "logs"    
+}
 
 const secretTableColumns = [
     "hashed_secret",
@@ -28,12 +27,15 @@ export const app = {
     database: process.env.MYSQL_DATABASE,
 
     targetTable: process.env.MYSQL_TABLE_TARGET,
-    targetTableColumns: targetTableColumns,
+    targetTableCols: targetTableCols,
 
     secretsTable: process.env.MYSQL_TABLE_SECRETS,
     secretsTableColumns: secretTableColumns,
 
     csvLocation: `${path.resolve()}/public`,
-    statusColumnIndex: 5,
-    readerNumberColumnIndex: 2
+
+    provisionStatusColIndex: 3,
+    rtcStatusColIndex: 4,
+    activeColIndex: 8,
+    readerNumberColIndex: 2
 }

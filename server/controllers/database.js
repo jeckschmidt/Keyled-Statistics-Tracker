@@ -7,6 +7,12 @@ import { getIo } from './websocket.js'
 import { CustomError } from '../types/error.js'
 import { app } from '../../config.js'
 
+const provisionStatusColIndex = app.provisionStatusColIndex
+const rtcStatusColIndex = app.rtcStatusColIndex
+const readerNumberColIndex = app.readerNumberColIndex
+const activeColIndex = app.activeColIndex
+
+
 let pool
 async function getDatabasePool() {
     if (!pool) {
@@ -30,10 +36,11 @@ async function getDatabasePool() {
  */
 async function tableInsert(table, columns, values) {
     const pool = await getDatabasePool()
-    const tableRows = columns.join(", ")
+    const tableCols = columns.join(", ")
     const tableValues = ("?".repeat(columns.length)).split("").join(",")
+
     const query = `INSERT INTO ${table}
-                    (${tableRows})
+                    (${tableCols})
                     VALUES (${tableValues})`
 
     try {
@@ -50,6 +57,7 @@ async function tableInsert(table, columns, values) {
  * @param {string[]} columns - Which columns are wanted
  * @returns {object[]} Returns list of all entries
  */
+
 async function getTableAllRows(table, columns=null, isAll=true) {
     const pool = await getDatabasePool()
     try {
@@ -92,19 +100,27 @@ async function getTableEntry(table, key, columns) {
  */
 export async function insertIntoTarget(values) {
     const table = app.targetTable
-    const tableRows = app.targetTableColumns
+    const tableRows = Object.values(app.targetTableCols)
+    let result
     try {
         await tableInsert(table, tableRows, values)
     } catch (err) {
         throw err
     }
 
-    let {rows, columns} = await tableToJSON(true)
+    let {rows, _} = await tableToJSON()
     let newRow = rows[rows.length - 1]
 
     let io = getIo()
-    const statusColumnIndex = app.statusColumnIndex
-    io.emit('newRow', {newRow: newRow, statusColumnIndex: statusColumnIndex})
+    io.emit('newRow', {
+            newRow: newRow,
+            provisionStatusColIndex: provisionStatusColIndex,
+            rtcStatusColIndex: rtcStatusColIndex,
+            readerNumberColIndex: readerNumberColIndex,
+            activeColIndex: activeColIndex
+        })
+
+    return result
 }
 
 
@@ -150,16 +166,18 @@ export async function getHashedKeys() {
  */
 export async function tableToCSV() {
     const table = app.targetTable
+    const cols = app.targetTableCols
     const columns = [
         "id",
-        "serial_number",
-        "reader_number",
-        "hostname",
-        "flash_provision",
-        "status",
-        "bytes_written",
-        "program_version",
-        "flash_date"
+        cols.macAddress,
+        cols.provisionStatus,
+        cols.rtcStatus,
+        cols.programVersion,
+        cols.date,
+        cols.flashProvision,
+        cols.hostname,
+        cols.readerNumber,
+        cols.active
     ]
 
     try {
@@ -179,21 +197,22 @@ export async function tableToCSV() {
 /**
  * @summary Converts the target information table into a JSON (omits logs)
  */
-let inMemTable
 export async function tableToJSON() {
 
     const table = app.targetTable
+    const cols = app.targetTableCols
     const tableColumns = [
         "id",
-        "serial_number",
-        "reader_number",
-        "hostname",
-        "flash_provision",
-        "status",
-        "bytes_written",
-        "program_version",
-        "flash_date"
+        cols.macAddress,
+        cols.readerNumber,
+        cols.provisionStatus,
+        cols.rtcStatus,
+        cols.flashProvision,
+        cols.hostname,
+        cols.date,
+        cols.active,
     ]
+
     try {
         var results = await getTableAllRows(table, tableColumns, false)
     } catch (err) {
@@ -203,22 +222,27 @@ export async function tableToJSON() {
     const columnsTemp = results.length > 0 ? Object.keys(results[0]) : []
     let rows = results.length > 0 ?results.map(row => Object.values(row)) : []
 
-    const statusMap = {1: 'pass', 0: 'fail'}
-    const statusColumnIndex = app.statusColumnIndex
-    const readerNumberColumnIndex = app.readerNumberColumnIndex
+    const provisionStatusMap = {1: 'pass', 0: 'fail'}
+    const rtcStatusMap = {1: 'pass', 0: 'fail'}
+    const activeStatusMap = {1: 'true', 0: 'false'}
 
     for (const row of rows) {
-        row[statusColumnIndex] = statusMap[row[statusColumnIndex]] ?? row[statusColumnIndex];
+        row[provisionStatusColIndex] = provisionStatusMap[row[provisionStatusColIndex]] ?? row[provisionStatusColIndex]
+        row[rtcStatusColIndex] = rtcStatusMap[row[rtcStatusColIndex]] ?? row[rtcStatusColIndex]
+        row[activeColIndex] = activeStatusMap[row[activeColIndex]] ?? row[activeColIndex]
     }
     const columns = columnsTemp.map(processList)
 
-    inMemTable = {
+    let newTable = {
         rows: rows,
         columns: columns,
-        statusColumnIndex: statusColumnIndex,
-        readerNumberColumnIndex: readerNumberColumnIndex
+
+        provisionStatusColIndex: provisionStatusColIndex,
+        rtcStatusColIndex: rtcStatusColIndex,
+        readerNumberColIndex: readerNumberColIndex,
+        activeColIndex: activeColIndex
     }
-    return inMemTable
+    return newTable
 
 }
 
@@ -292,6 +316,7 @@ export async function updateReaderNumber(id, readerNumber) {
 
     try {
         await pool.query(query)
+        console.log(`[DATABASE API] Reader number for entry ${id} changed to ${readerNumber}`)
     } catch (err) {
         throw err
     }
@@ -308,8 +333,14 @@ function processList(string) {
     words = words.map(function(word) {
         return capitalize(word)
     })
+
     if (String(string) == "flash_provision") {
         return words.join("/")
     }
+
+    if (String(string) == "date") {
+        return `${words} (UTC)`
+    }
+
     return words.join(" ")
 }

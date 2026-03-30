@@ -15,8 +15,16 @@ socket.on('init', (data) => {
         console.error("Server couldn't send table")
         return
     }
-    const {columns, rows, statusColumnIndex, readerNumberColumnIndex} = data.table
-    renderTable(columns, rows, statusColumnIndex, readerNumberColumnIndex)
+    const {
+        columns, 
+        rows, 
+        provisionStatusColIndex, 
+        rtcStatusColIndex, 
+        readerNumberColIndex, 
+        activeColIndex
+    } = data.table
+
+    renderTable(columns, rows, provisionStatusColIndex, rtcStatusColIndex, readerNumberColIndex, activeColIndex)
 });
 
 socket.on('newRow', (data) => {
@@ -25,8 +33,12 @@ socket.on('newRow', (data) => {
         return
     }
     const row = data.newRow
-    const statusColumnIndex = data.statusColumnIndex
-    appendRow(row, statusColumnIndex)
+    const provisionStatusColIndex = data.provisionStatusColIndex
+    const rtcStatusColIndex = data.rtcStatusColIndex
+    const readerNumberColIndex = data.readerNumberColIndex
+    const activeColIndex = data.activeColIndex
+
+    appendRow(row, provisionStatusColIndex, rtcStatusColIndex, readerNumberColIndex, activeColIndex)
 });
 /* ----------------------------------------------------------- */
 
@@ -34,7 +46,7 @@ socket.on('newRow', (data) => {
 
 /* ----------------------TABLE RENDERING-----------------------*/
 /* ----------------------------------------------------------- */
-function renderTable(columns, rows, statusColumnIndex, readerNumberColumnIndex) {
+function renderTable(columns, rows, provisionStatusColIndex, rtcStatusColIndex, readerNumberColIndex, activeColIndex) {
 
     if (isRendered) {
         return
@@ -68,16 +80,16 @@ function renderTable(columns, rows, statusColumnIndex, readerNumberColumnIndex) 
     // ROWS OF DATA
     const tbody = document.getElementById('table_body')
     rows.forEach(row => {
-        const tr = createTableRow(row, statusColumnIndex, readerNumberColumnIndex)
+        const tr = createTableRow(row, provisionStatusColIndex, rtcStatusColIndex, readerNumberColIndex, activeColIndex)
         tbody.appendChild(tr);
     })
     isRendered = true
 }
 
-function appendRow(row, statusColumnIndex) {
+function appendRow(row, provisionStatusColIndex, rtcStatusColIndex, readerNumberColIndex, activeColIndex) {
 
     const tbody = document.getElementById('table_body')
-    const tr = createTableRow(row, statusColumnIndex)
+    const tr = createTableRow(row, provisionStatusColIndex, rtcStatusColIndex,readerNumberColIndex, activeColIndex)
 
     //tbody.append(tr) **** this is for descending order
     tbody.prepend(tr);
@@ -149,14 +161,14 @@ modal.addEventListener("click", (event) => {
 /* -------------------HELPER FUNCTIONS------------------------ */
 /* ----------------------------------------------------------- */
 
-function createTableRow(row, statusColumnIndex, readerNumberColumnIndex) {
+function createTableRow(row, provisionStatusColIndex, rtcStatusColIndex, readerNumberColIndex, activeColIndex) {
     const tr = document.createElement('tr');
 
     row.forEach((data, colIndex) => {
         const td = document.createElement('td');
 
         /* if reader number, make editable and capture changes */
-        if (colIndex === readerNumberColumnIndex) {
+        if (colIndex === readerNumberColIndex) {
 
             td.contentEditable = 'plaintext-only'
             td.textContent = data
@@ -200,15 +212,15 @@ function createTableRow(row, statusColumnIndex, readerNumberColumnIndex) {
             })
         } 
 
-        /* if status, add color */
-        else if (colIndex === statusColumnIndex) {
+        /* if rtc status, provision status, or active column, add color */
+        else if ((colIndex === rtcStatusColIndex) || (colIndex === provisionStatusColIndex) || (colIndex === activeColIndex)) {
             let span = document.createElement('span')
-            if (data === 'pass') span.classList.add('num-green')
-            else if (data === 'fail') span.classList.add('num-red')
+            if (data === 'pass' || data === 'true') span.classList.add('num-green')
+            else if (data === 'fail' || data === 'false') span.classList.add('num-red')
 
             span.textContent = data
             td.appendChild(span)
-        } 
+        }
         
         else {
             td.textContent = data

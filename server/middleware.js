@@ -8,7 +8,7 @@ export function globalErrorHandler(err, req, res, next) {
         console.error(`[${err.origin}] ${err.details} --${err.message} ${err.error}: ${err.stack}`)
 
         return res.status(err.status).json({
-            details: err.details
+            message: err.details
         })
     }
 

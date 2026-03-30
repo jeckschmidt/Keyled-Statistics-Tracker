@@ -5,6 +5,7 @@ import bodyParser from 'body-parser'
 import { insertIntoTarget, tableToCSV, getEntryCount, getLog, updateReaderNumber } from '../controllers/database.js'
 import { CustomError } from '../types/error.js'
 import { apiAuth } from '../middleware.js'
+import { app } from '../../config.js'
 
 const router = express.Router()
 router.use(bodyParser.json())
@@ -21,12 +22,28 @@ router.post('/insert/target', apiAuth, async (req, res, next)=> {
     console.log("[Database API] New entry requested to be entered....")
     var body = req.body
 
-    // Process the data into a list
-    var values = Object.values(body)
+    // validate data
+    const tableColumns = Object.values(app.targetTableCols)
+    for (const key of Object.keys(body)) {
+        if (!tableColumns.includes(key)) {
+            return res.status(400).json({message: "Missing required fields"})
+        }
+    }
+
+    // re-order to match database columns
+    let temp = []
+    for (const key of Object.values(tableColumns)) {
+        const value = body[key]
+        temp.push(value)
+    }
+
+    // parse into list
+    const values = Object.values(temp)
 
     try {
         await insertIntoTarget(values)
         await tableToCSV()
+        
         console.log("[Database API] Entry entered successfully")
         res.status(200).json({message: "Success"})
     } catch (err) {
