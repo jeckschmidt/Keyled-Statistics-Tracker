@@ -4,7 +4,7 @@ import bodyParser from 'body-parser'
 
 import { insertIntoTarget, tableToCSV, getEntryCount, getLog, updateReaderNumber } from '../controllers/database.js'
 import { CustomError } from '../types/error.js'
-import { apiAuth } from '../middleware.js'
+import { apiAuth, loginAuth } from '../middleware.js'
 import { app } from '../../config.js'
 
 const router = express.Router()
@@ -76,7 +76,7 @@ router.get('/get-entry-count', apiAuth, async (req, res, next) => {
  * @param {string} id - The id of the entry
  * @returns {string} - The log associated with the id
  */
-router.get('/get-log/:id', async (req, res, next) => {
+router.get('/get-log/:id', loginAuth, async (req, res, next) => {
     const id = req.params.id
 
     let log
@@ -98,7 +98,7 @@ router.get('/get-log/:id', async (req, res, next) => {
  * @summary Update a reader number of the associated id
  * @param {int} readerNumber - The new reader number to be entered
  */
-router.post('/update-reader-number/:id', async (req, res, next) => {
+router.post('/update-reader-number/:id', loginAuth, async (req, res, next) => {
     const id = req.params.id
     const readerNumber = req.body.readerNumber
 

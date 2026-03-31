@@ -6,7 +6,6 @@
 /provisioning-and-flashing-tracker-pub-key.pem
 /keyled-statistics-tracker-PERSONAL.pem
 /us-east-1-bundle.pem
-/public/frontend/bundle.js
-/public/frontend/bundle.css
+**/bundles/
 /public/flashes.csv
 /keys.txt

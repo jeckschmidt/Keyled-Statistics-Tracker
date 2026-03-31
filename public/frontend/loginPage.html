@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>mPOD Provisioning and Flashing Tracker</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="frontend/bundles/loginPage.css">
+    </head>
+    <body>
+        <div class="page">
+            <div class="header">
+                <div id="image"> <img src="../Images/mPODLOGO.png" alt="mPOD Logo"></div>
+                <h1 id="title"> mPOD Provisioning and Flashing Tracker </h1>
+            </div>
+        </div>
+
+        <div class="body">
+            <div class="login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <h2>Sign In</h2>
+                    </div>
+                    
+                    <form class="login-form" id="loginForm" novalidate>
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input  id="username" name="username" placeholder="Username">
+                            </div>
+                            <span class="error-message" id="usernameError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <input type="password" id="password" name="password" placeholder="Password">
+                            </div>
+                            <span class="error-message" id="passwordError"></span>
+                        </div>
+
+                        <button type="submit" class="login-btn">
+                            <span class="btn-text">Sign In</span>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </form>
+
+
+                    <div class="success-message" id="successMessage">
+                        <h3>Login Successful!</h3>
+                        <p>Redirecting...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="frontend/bundles/loginPage.js"> </script>
+         
+    </body>
+</html>

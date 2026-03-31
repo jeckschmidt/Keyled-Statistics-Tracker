@@ -4,14 +4,16 @@ import dotenv from 'dotenv/config'
 import path from 'path'
 import helmet from 'helmet'
 import { fileURLToPath } from 'url'
+import cookieParser from "cookie-parser"
 
-import  { startWebSocketServer } from "./controllers/websocket.js"
+import { startWebSocketServer } from "./controllers/websocket.js"
 import { app as appConfig } from '../config.js'
 import { globalErrorHandler } from './middleware.js'
 import { sleep } from './controllers/helpers.js'
 import { tableToCSV } from './controllers/database.js'
 
 import homeRoute from './routes/app.js'
+import loginRoute from './routes/login.js'
 import databaseRoute from './routes/database.js'
 // import { table } from 'console'
 
@@ -47,12 +49,15 @@ async function start(app, port) {
     return server.listen({port: port, host: "0.0.0.0"})
 }
 
+app.use(cookieParser())
+
 // app.use(helmet())
 app.set('trust proxy', true)
 
-app.use('/home', homeRoute)
 app.use('/database', databaseRoute)
 app.use(express.static(path.join(__dirname, "..", "public")))
+app.use('/', homeRoute)
+app.use('/login', loginRoute)
 
 // global error handling middlware
 app.use(globalErrorHandler)

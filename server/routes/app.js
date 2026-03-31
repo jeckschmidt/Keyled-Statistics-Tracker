@@ -3,15 +3,17 @@ import path from 'path'
 import { fileURLToPath } from 'url';
 
 import { CustomError } from '../types/error.js';
+import { loginAuth } from '../middleware.js';
 
 const router = express.Router()
 
 const __filename = fileURLToPath(import.meta.url);
 let __dirname = path.dirname(__filename);
 __dirname = path.join(__dirname, "../..", 'public')
-
 let origin="App"
-router.get('/', (req,res,next) => {
+
+// home page
+router.get('/home', loginAuth, (req,res,next) => {
     
     var filePath = `${__dirname}/frontend/homePage.html`
     res.status(200).sendFile(filePath, (err) => {
@@ -23,5 +25,12 @@ router.get('/', (req,res,next) => {
         }
     })
 })
+
+
+// redirect to home page
+router.get('/', (req,res,next) => {
+    res.redirect('/home')
+})
+
 
 export default router

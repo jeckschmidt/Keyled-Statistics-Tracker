@@ -74,16 +74,23 @@ async function getTableAllRows(table, columns=null, isAll=true) {
 /**
  * @summary Generic function for getting one entry from a table
  * @param {string} table - The table to query
- * @param {{column: string, value}} key - The key for the entry; ... WHERE column=value 
+ * @param {{column: string, value: any}} key - The key for the entry; ... WHERE column=value 
  * @param {string[]} columns - Which columns are wanted
  * @returns {object[]} JSON entry inside a list
  */
 async function getTableEntry(table, key, columns) {
     const pool = await getDatabasePool()
     const tableColumns = columns.join(",")
+
+    let value = key.value
+    if (typeof key.value === 'string') {
+        value = `"${key.value}"`
+    }
+
     const query = `SELECT ${tableColumns}
                    FROM ${table}
-                   WHERE ${key.column}=${key.value}`
+                   WHERE ${key.column}=${value}`
+
     
     try {
         const [entry, _] = await pool.query(query)
@@ -126,8 +133,8 @@ export async function insertIntoTarget(values) {
 
 /**
  * @summary Inserts new entry into secrets table
- * @param {string} table - User of the secret
- * @param {string[]} columns - The hashed secret of the user
+ * @param {string} user - User of the secret
+ * @param {string[]} hashed_key - The hashed secret of the user
  */
 export async function insertIntoSecrets(user, hashed_key) {
     const table = app.secretsTable
@@ -155,6 +162,48 @@ export async function getHashedKeys() {
         const hashedKeys = temp.map(temp => temp.hashed_secret) 
 
         return hashedKeys
+    } catch (err) {
+        throw err
+    }
+}
+
+
+/**
+ * @summary Inserts new entry into secrets table
+ * @param {string} username - The username of the user
+ * @param {string[]} password_hash - The hashed password of the user
+ */
+export async function insertIntoUsers(username, password_hash) {
+    const table = app.usersTable
+    const columns = app.usersTableColumns
+    const values = [username, password_hash]
+
+    try {
+        await tableInsert(table, columns, values)
+    } catch (err) {
+        throw err
+    }
+}
+
+
+/**
+ * @summary Gets the username and password hash of a user
+ * @param {string} username - Username identifying a user
+ */
+export async function getUser(username) {
+
+    const table = app.usersTable
+    const columns = ["username", "password_hash"]
+    const key = {
+        column: "username",
+        value: username,
+    }
+    
+    try {
+        let temp = await getTableEntry(table, key, columns)
+        let user = temp
+
+        return user
     } catch (err) {
         throw err
     }

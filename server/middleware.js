@@ -1,6 +1,7 @@
 import { CustomError } from "./types/error.js"
 import { getHashedKeys } from './controllers/database.js'
-import { compareHash} from './controllers/auth.js'
+import { compareHash, getSessionId } from './controllers/auth.js'
+
 
 // global error handling middlware
 export function globalErrorHandler(err, req, res, next) {
@@ -38,5 +39,20 @@ export async function apiAuth(req, res, next) {
     }
 
     // return 401 if it doesn't match
-    res.status(401).json({message: "Invalid authorization"})
+    return res.status(401).json({message: "Invalid authorization"})
+}
+
+export async function loginAuth(req, res, next) {
+
+    const sessionId = req.cookies.sessionId
+
+    // validate session id
+    if (sessionId === undefined) {
+        return res.status(401).redirect('/login')
+    }
+    if (getSessionId(sessionId) === undefined) {
+        return res.status(401).redirect('/login')
+    }
+
+    return next()
 }

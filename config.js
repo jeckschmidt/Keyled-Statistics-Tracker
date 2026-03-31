@@ -19,6 +19,11 @@ const secretTableColumns = [
     "user"
 ]
 
+const usersTableColumns = [
+    "username",
+    "password_hash"
+]
+
 export const app = {
     port: process.env.PORT,
     host: process.env.MYSQL_HOST,
@@ -31,6 +36,9 @@ export const app = {
 
     secretsTable: process.env.MYSQL_TABLE_SECRETS,
     secretsTableColumns: secretTableColumns,
+
+    usersTable: process.env.MYSQL_TABLE_USERS,
+    usersTableColumns: usersTableColumns,
 
     csvLocation: `${path.resolve()}/public`,
 
