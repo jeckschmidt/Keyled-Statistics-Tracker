@@ -31,6 +31,11 @@ body {
     align-items: center;
     justify-content: center;
     gap: 5px;
+    height: 175px;
+}
+
+#image img {
+  transform: scale(0.7);
 }
 
 
@@ -164,10 +169,6 @@ tbody tr:hover {
     color: white;
     padding: 2px 6px;
     border-radius: 4px;
-}
-
-#image {
-    transform: scale(0.8);
 }
 
 #title {
