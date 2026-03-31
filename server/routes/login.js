@@ -5,7 +5,7 @@ import bodyParser from 'body-parser'
 
 import { getUser } from '../controllers/database.js';
 import { CustomError } from '../types/error.js';
-import { isPasswordValid, createSession } from '../controllers/auth.js';
+import { isPasswordValid, createSession, getSessionId } from '../controllers/auth.js';
 
 const router = express.Router()
 router.use(bodyParser.json())
@@ -17,6 +17,12 @@ let origin="Login"
 
 // login page
 router.get('/', (req,res,next) => {
+
+    const sessionId = req.cookies.sessionId
+    if (sessionId !== undefined && getSessionId(sessionId) !== undefined) {
+        return res.status(401).redirect('/home')
+    }
+    
     
     var filePath = `${__dirname}/frontend/loginPage.html`
     res.status(200).sendFile(filePath, (err) => {

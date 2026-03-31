@@ -109,7 +109,7 @@ async function createLogPop(id, actionType) {
     // show the modal
     const modalTitle = document.getElementById('modal-title')
 
-    modalTitle.textContent = `${actionType} #${id} logs`
+    modalTitle.textContent = `entry #${id} logs`
     modal.style.display = 'flex'
     document.body.style.overflow = "hidden"
 
