@@ -6,6 +6,7 @@ on:
       - 'README.md'
       - '.github/**'
       - 'scripts/**'
+      - 'gen_*'
     branches:
       - main
 

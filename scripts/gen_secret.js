@@ -3,7 +3,7 @@ import readline from 'readline/promises'
 import { stdin as input, stdout as output } from "process";
 
 // custom modules
-import { genKey } from './server/controllers/auth.js';
+import { genSecret } from './server/controllers/auth.js';
 import { insertIntoSecrets } from './server/controllers/database.js';
 
 // function for generating key
@@ -15,7 +15,7 @@ async function genNewKey() {
     rl.close()
 
     // create a secure key
-    const [key, hashed_key] = await genKey()
+    const [key, hashed_key] = await genSecret()
 
     // save it into database
     try {

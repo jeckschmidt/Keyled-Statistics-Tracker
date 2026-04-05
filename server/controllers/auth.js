@@ -5,12 +5,12 @@ import { generateApiKey } from 'generate-api-key'
 /*--------------------------------API KEY------------------------------------*/
 /*---------------------------------------------------------------------------*/
 /* Generate api key */
-export async function genKey() {
+export async function genSecret() {
     // generate the key
     const key = generateApiKey({method: 'uuidv4'})
 
     // hash the key
-    const hashed_key = hashData(key)
+    const hashed_key = hashKeyData(key)
 
     // return the key and hashed key
     return [key, hashed_key]
